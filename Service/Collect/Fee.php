@@ -7,6 +7,7 @@ namespace Praxigento\PensionFund\Service\Collect;
 
 use Praxigento\Accounting\Repo\Entity\Data\Operation as EOper;
 use Praxigento\PensionFund\Config as Cfg;
+use Praxigento\PensionFund\Service\Collect\Fee\Own\Calc as ACalc;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals as QBGetCreditTotals;
 use Praxigento\PensionFund\Service\Collect\Fee\Request as ARequest;
 use Praxigento\PensionFund\Service\Collect\Fee\Response as AResponse;
@@ -15,6 +16,8 @@ class Fee
 {
     /** @var \Praxigento\Core\Api\Helper\Period */
     private $hlpPeriod;
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Calc */
+    private $ownCalc;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
     private $qbGetCreditTotals;
     /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
@@ -32,7 +35,8 @@ class Fee
         \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
-        QBGetCreditTotals $qbGetCreditTotals
+        QBGetCreditTotals $qbGetCreditTotals,
+        ACalc $ownCalc
     ) {
         $this->repoTypeAsset = $repoTypeAsset;
         $this->repoTypeOper = $repoTypeOper;
@@ -40,6 +44,7 @@ class Fee
         $this->hlpPeriod = $hlpPeriod;
         $this->servCalcDep = $servCalcDep;
         $this->qbGetCreditTotals = $qbGetCreditTotals;
+        $this->ownCalc = $ownCalc;
     }
 
 
@@ -67,6 +72,7 @@ class Fee
         /* get total credit and customers ranks */
         $totals = $this->getCreditTotal($dsBegin, $dsEnd);
         $ranks = $this->getRanks($cmprsCalcId);
+        $fees = $this->ownCalc->exec($totals, $ranks);
         /** compose result */
         $result = new AResponse();
         return $result;

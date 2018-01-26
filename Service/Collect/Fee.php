@@ -8,6 +8,7 @@ namespace Praxigento\PensionFund\Service\Collect;
 use Praxigento\Accounting\Repo\Entity\Data\Operation as EOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\Calc as ACalc;
+use Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation as ACreateOper;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals as QBGetCreditTotals;
 use Praxigento\PensionFund\Service\Collect\Fee\Request as ARequest;
 use Praxigento\PensionFund\Service\Collect\Fee\Response as AResponse;
@@ -18,10 +19,14 @@ class Fee
     private $hlpPeriod;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Calc */
     private $ownCalc;
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation */
+    private $ownCreateOper;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
     private $qbGetCreditTotals;
     /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
     private $repoBonDwnl;
+    /** @var \Praxigento\BonusBase\Repo\Entity\Calculation */
+    private $repoCalc;
     /** @var \Praxigento\Accounting\Repo\Entity\Type\Asset */
     private $repoTypeAsset;
     /** @var \Praxigento\Accounting\Repo\Entity\Type\Operation */
@@ -32,19 +37,23 @@ class Fee
     public function __construct(
         \Praxigento\Accounting\Repo\Entity\Type\Asset $repoTypeAsset,
         \Praxigento\Accounting\Repo\Entity\Type\Operation $repoTypeOper,
+        \Praxigento\BonusBase\Repo\Entity\Calculation $repoCalc,
         \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         QBGetCreditTotals $qbGetCreditTotals,
-        ACalc $ownCalc
+        ACalc $ownCalc,
+        ACreateOper $ownCreateOper
     ) {
         $this->repoTypeAsset = $repoTypeAsset;
         $this->repoTypeOper = $repoTypeOper;
+        $this->repoCalc = $repoCalc;
         $this->repoBonDwnl = $repoBonDwnl;
         $this->hlpPeriod = $hlpPeriod;
         $this->servCalcDep = $servCalcDep;
         $this->qbGetCreditTotals = $qbGetCreditTotals;
         $this->ownCalc = $ownCalc;
+        $this->ownCreateOper = $ownCreateOper;
     }
 
 
@@ -68,13 +77,18 @@ class Fee
         list($feePeriod, $feeCalc, $cmprsCalc) = $this->getCalcData();
         $dsBegin = $feePeriod->getDstampBegin();
         $dsEnd = $feePeriod->getDstampEnd();
+        $feeCalcId = $feeCalc->getId();
         $cmprsCalcId = $cmprsCalc->getId();
         /* get total credit and customers ranks */
         $totals = $this->getCreditTotal($dsBegin, $dsEnd);
         $ranks = $this->getRanks($cmprsCalcId);
         $fees = $this->ownCalc->exec($totals, $ranks);
+        $period = substr($dsEnd, 0, 6);
+        $operId = $this->ownCreateOper->exec($fees, $period);
+        $this->repoCalc->markComplete($feeCalcId);
         /** compose result */
         $result = new AResponse();
+        $result->setOperationId($operId);
         return $result;
     }
 

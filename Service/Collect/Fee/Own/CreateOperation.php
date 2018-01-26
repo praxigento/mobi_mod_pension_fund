@@ -15,6 +15,8 @@ use Praxigento\PensionFund\Config as Cfg;
  */
 class CreateOperation
 {
+    /** @var \Praxigento\Core\Api\Helper\Period */
+    private $hlpPeriod;
     /** @var \Praxigento\Accounting\Repo\Entity\Account */
     private $repoAcc;
     /** @var \Praxigento\Accounting\Repo\Entity\Type\Asset */
@@ -25,16 +27,18 @@ class CreateOperation
     public function __construct(
         \Praxigento\Accounting\Repo\Entity\Account $repoAcc,
         \Praxigento\Accounting\Repo\Entity\Type\Asset $repoAssetType,
+        \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation $servOper
     ) {
         $this->repoAcc = $repoAcc;
         $this->repoAssetType = $repoAssetType;
+        $this->hlpPeriod = $hlpPeriod;
         $this->servOper = $servOper;
     }
 
     /**
      * @param array $fees
-     * @param string $period
+     * @param string $period 'YYYYMM'
      * @return int id of the created operation
      * @throws \Exception
      */
@@ -42,18 +46,21 @@ class CreateOperation
     {
         $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
         $accIdRepres = $this->repoAcc->getRepresentativeAccountId($assetTypeId);
+        $ds = $this->hlpPeriod->getPeriodLastDate($period);
+        $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         /* prepare bonus & fee transactions */
         $trans = [];
         foreach ($fees as $custId => $amount) {
             $accCust = $this->repoAcc->getByCustomerId($custId, $assetTypeId);
             $accIdCust = $accCust->getId();
-            $tranBonus = new ETrans();
-            $tranBonus->setDebitAccId($accIdCust);
-            $tranBonus->setCreditAccId($accIdRepres);
-            $tranBonus->setValue($amount);
+            $tran = new ETrans();
+            $tran->setDebitAccId($accIdCust);
+            $tran->setCreditAccId($accIdRepres);
+            $tran->setValue($amount);
+            $tran->setDateApplied($dateApplied);
             $note = "Processing fee for period #$period.";
             $operType = Cfg::CODE_TYPE_OPER_PROC_FEE;
-            $trans[] = $tranBonus;
+            $trans[] = $tran;
         }
         /* create operation */
         $req = new AReqOper();

@@ -40,8 +40,10 @@ class ProcessingFee
 
         $req = new \Praxigento\PensionFund\Service\Collect\Fee\Request();
         $resp = $this->servCollectFee->exec($req);
+        $operId = $resp->getOperationId();
+        $output->writeln("<info>Processing fee operation #$operId is created.<info>");
 
-        $this->manTrans->rollback($def);
+        $this->manTrans->commit($def);
         $output->writeln('<info>Command is completed.<info>');
     }
 }

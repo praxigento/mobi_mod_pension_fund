@@ -57,7 +57,9 @@ class Calc
                     if ($amount <= $level) break;
                 }
             }
-            $result[$custId] = $fee;
+            if ($fee > Cfg::DEF_ZERO) {
+                $result[$custId] = $fee;
+            }
         }
         return $result;
     }

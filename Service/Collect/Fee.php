@@ -17,6 +17,8 @@ class Fee
     private $hlpPeriod;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
     private $qbGetCreditTotals;
+    /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
+    private $repoBonDwnl;
     /** @var \Praxigento\Accounting\Repo\Entity\Type\Asset */
     private $repoTypeAsset;
     /** @var \Praxigento\Accounting\Repo\Entity\Type\Operation */
@@ -27,12 +29,14 @@ class Fee
     public function __construct(
         \Praxigento\Accounting\Repo\Entity\Type\Asset $repoTypeAsset,
         \Praxigento\Accounting\Repo\Entity\Type\Operation $repoTypeOper,
+        \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         QBGetCreditTotals $qbGetCreditTotals
     ) {
         $this->repoTypeAsset = $repoTypeAsset;
         $this->repoTypeOper = $repoTypeOper;
+        $this->repoBonDwnl = $repoBonDwnl;
         $this->hlpPeriod = $hlpPeriod;
         $this->servCalcDep = $servCalcDep;
         $this->qbGetCreditTotals = $qbGetCreditTotals;
@@ -42,6 +46,8 @@ class Fee
     /**
      * @param ARequest $request
      * @return AResponse
+     * @throws \Exception
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function exec($request)
     {
@@ -50,23 +56,27 @@ class Fee
 
         /** perform processing */
         /**
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Period $feePeriodData
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $feeCalcData
+         * @var \Praxigento\BonusBase\Repo\Entity\Data\Period $feePeriod
+         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $feeCalc
+         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $cmprsCalc
          */
-        list($feePeriodData, $feeCalcData) = $this->getCalcData();
-        $dsBegin = $feePeriodData->getDstampBegin();
-        $dsEnd = $feePeriodData->getDstampEnd();
-
-        $bu = $this->getCreditTotal($dsBegin, $dsEnd);
+        list($feePeriod, $feeCalc, $cmprsCalc) = $this->getCalcData();
+        $dsBegin = $feePeriod->getDstampBegin();
+        $dsEnd = $feePeriod->getDstampEnd();
+        $cmprsCalcId = $cmprsCalc->getId();
+        /* get total credit and customers ranks */
+        $totals = $this->getCreditTotal($dsBegin, $dsEnd);
+        $ranks = $this->getRanks($cmprsCalcId);
         /** compose result */
         $result = new AResponse();
         return $result;
     }
 
     /**
-     * Get data for dependent calculation.
+     * Get data for period & calculations.
      *
      * @return array [$periodData, $calcData]
+     * @throws \Exception
      */
     private function getCalcData()
     {
@@ -79,10 +89,27 @@ class Fee
         $periodData = $resp->getDepPeriodData();
         /** @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $calcData */
         $calcData = $resp->getDepCalcData();
-        $result = [$periodData, $calcData];
+        /* get additional calculation data */
+        $periodEnd = $periodData->getDstampEnd();
+        $req->setBaseCalcTypeCode(Cfg::CODE_TYPE_CALC_COMPRESS_PHASE1);
+        $req->setDepCalcTypeCode(Cfg::CODE_TYPE_CALC_PROC_FEE);
+        $req->setDepIgnoreComplete(true);
+        $req->setPeriodEnd($periodEnd);
+        $resp = $this->servCalcDep->exec($req);
+        $calcCompressData = $resp->getBaseCalcData();
+        /* compose result */
+        $result = [$periodData, $calcData, $calcCompressData];
         return $result;
     }
 
+    /**
+     * Get total bonus amount by customer.
+     *
+     * @param $dsFrom
+     * @param $dsTo
+     * @return array [$custId=>$amount]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function getCreditTotal($dsFrom, $dsTo)
     {
         $dateFrom = $this->hlpPeriod->getTimestampFrom($dsFrom);
@@ -115,6 +142,7 @@ class Fee
                 $result[$custId] = $total;
             }
         }
+        return $result;
     }
 
     /**
@@ -132,6 +160,18 @@ class Fee
         $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_REBATE);
         $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_SIGNUP_DEBIT);
         $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_TEAM);
+        return $result;
+    }
+
+    private function getRanks($cmprsCalcId)
+    {
+        $result = [];
+        $tree = $this->repoBonDwnl->getByCalcId($cmprsCalcId);
+        foreach ($tree as $one) {
+            $custId = $one->getCustomerRef();
+            $rankId = $one->getRankRef();
+            $result[$custId] = $rankId;
+        }
         return $result;
     }
 }

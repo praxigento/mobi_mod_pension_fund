@@ -7,6 +7,7 @@
 
 namespace Praxigento\PensionFund\Setup;
 
+use Praxigento\Accounting\Repo\Entity\Data\Type\Asset as TypeAsset;
 use Praxigento\Accounting\Repo\Entity\Data\Type\Operation as TypeOperation;
 use Praxigento\BonusBase\Repo\Entity\Data\Type\Calc as TypeCalc;
 use Praxigento\PensionFund\Config as Cfg;
@@ -19,8 +20,24 @@ class InstallData
 {
     protected function _setup()
     {
+        $this->addAccountingAssetsTypes();
         $this->addAccountingOperationsTypes();
         $this->addBonusCalculationsTypes();
+    }
+
+    private function addAccountingAssetsTypes()
+    {
+        $this->_conn->insertArray(
+            $this->_resource->getTableName(TypeAsset::ENTITY_NAME),
+            [TypeAsset::ATTR_CODE, TypeAsset::ATTR_NOTE, TypeAsset::ATTR_IS_VISIBLE],
+            [
+                [
+                    Cfg::CODE_TYPE_ASSET_PENSION,
+                    'Pension funds. Programmatically processing only.',
+                    false
+                ]
+            ]
+        );
     }
 
     private function addAccountingOperationsTypes()
@@ -29,6 +46,8 @@ class InstallData
             $this->_resource->getTableName(TypeOperation::ENTITY_NAME),
             [TypeOperation::ATTR_CODE, TypeOperation::ATTR_NOTE],
             [
+                [Cfg::CODE_TYPE_OPER_PENSION, 'Pension funds payments.'],
+                [Cfg::CODE_TYPE_OPER_PENSION_PERCENT, 'Pension funds interest payments.'],
                 [Cfg::CODE_TYPE_OPER_PROC_FEE, 'Processing fee.']
             ]
         );
@@ -40,7 +59,9 @@ class InstallData
             $this->_resource->getTableName(TypeCalc::ENTITY_NAME),
             [TypeCalc::ATTR_CODE, TypeCalc::ATTR_NOTE],
             [
-                [Cfg::CODE_TYPE_CALC_PROC_FEE, 'Processing fee calculation.'],
+                [Cfg::CODE_TYPE_CALC_PENSION, 'Pension funds payments calculation.'],
+                [Cfg::CODE_TYPE_CALC_PENSION_PERCENT, 'Pension funds interest calculation.'],
+                [Cfg::CODE_TYPE_CALC_PROC_FEE, 'Processing fee calculation.']
             ]
         );
     }

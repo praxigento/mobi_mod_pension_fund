@@ -1,0 +1,156 @@
+{
+  "dBEAR": {
+    "package": {
+      "Praxigento": {
+        "alias": "prxgt",
+        "comment": "Root namespace for Praxigento modules",
+        "package": {
+          "Pension": {
+            "alias": "pens",
+            "comment": "Top level package for Praxigento_PensionFund module",
+            "entity": {
+              "Registry": {
+                "alias": "reg",
+                "comment": "Customer registry for pension fund.",
+                "attribute": {
+                  "CustomerRef": {
+                    "alias": "customer_ref",
+                    "comment": "Reference to the customer.",
+                    "nullable": false,
+                    "type": {
+                      "integer": {
+                        "unsigned": true
+                      }
+                    }
+                  },
+                  "DateSince": {
+                    "alias": "date_since",
+                    "comment": "Date when customer was joined to the program.",
+                    "nullable": false,
+                    "type": {
+                      "datetime": {}
+                    }
+                  },
+                  "DateTerminated": {
+                    "alias": "date_term",
+                    "comment": "Date when customer was cancelled from the program (inactivity reason).",
+                    "nullable": true,
+                    "type": {
+                      "datetime": {}
+                    }
+                  },
+                  "MonthsTotal": {
+                    "alias": "months_total",
+                    "comment": "Total months of the participation in the program.",
+                    "nullable": false,
+                    "type": {
+                      "integer": {
+                        "subtype": "smallint",
+                        "unsigned": true
+                      }
+                    }
+                  },
+                  "MonthsInactive": {
+                    "alias": "months_inact",
+                    "comment": "Total months of the inactivity in the current year (from date_since).",
+                    "nullable": false,
+                    "type": {
+                      "integer": {
+                        "subtype": "smallint",
+                        "unsigned": true
+                      }
+                    }
+                  },
+                  "MonthsLeft": {
+                    "alias": "months_left",
+                    "comment": "Months are left to the end of the current year (from date_since).",
+                    "nullable": true,
+                    "type": {
+                      "integer": {
+                        "subtype": "smallint",
+                        "unsigned": false
+                      }
+                    }
+                  },
+                  "BalanceOpen": {
+                    "alias": "balance_open",
+                    "comment": "Total amount for beginning of the last month.",
+                    "nullable": false,
+                    "type": {
+                      "numeric": {
+                        "precision": 12,
+                        "scale": 4
+                      }
+                    }
+                  },
+                  "AmountIn": {
+                    "alias": "amount_in",
+                    "comment": "Total incoming amount for the last month.",
+                    "nullable": false,
+                    "type": {
+                      "numeric": {
+                        "precision": 12,
+                        "scale": 4
+                      }
+                    }
+                  },
+                  "AmountPercent": {
+                    "alias": "amount_percent",
+                    "comment": "Total percents (3%) for the last month.",
+                    "nullable": false,
+                    "type": {
+                      "numeric": {
+                        "precision": 12,
+                        "scale": 4
+                      }
+                    }
+                  },
+                  "BalanceClose": {
+                    "alias": "balance_close",
+                    "comment": "Total amount for beginning of the last month.",
+                    "nullable": false,
+                    "type": {
+                      "numeric": {
+                        "precision": 12,
+                        "scale": 4
+                      }
+                    }
+                  }
+                },
+                "index": {
+                  "PK": {
+                    "type": "primary",
+                    "aliases": [
+                      "customer_ref"
+                    ]
+                  }
+                },
+                "relation": {
+                  "toDwnlCustomer": {
+                    "own": {
+                      "aliases": [
+                        "customer_ref"
+                      ]
+                    },
+                    "reference": {
+                      "entity": {
+                        "completeAlias": "prxgt_dwnl_customer"
+                      },
+                      "aliases": [
+                        "customer_ref"
+                      ]
+                    },
+                    "action": {
+                      "delete": "cascade",
+                      "update": "cascade"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

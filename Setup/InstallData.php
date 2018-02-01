@@ -47,6 +47,7 @@ class InstallData
             [TypeOperation::ATTR_CODE, TypeOperation::ATTR_NOTE],
             [
                 [Cfg::CODE_TYPE_OPER_PENSION, 'Pension funds payments.'],
+                [Cfg::CODE_TYPE_OPER_PENSION_CLEANUP, 'Pension funds cleanup payments (for inactive customers).'],
                 [Cfg::CODE_TYPE_OPER_PENSION_PERCENT, 'Pension funds interest payments.'],
                 [Cfg::CODE_TYPE_OPER_PROC_FEE, 'Processing fee.']
             ]
@@ -60,6 +61,7 @@ class InstallData
             [TypeCalc::ATTR_CODE, TypeCalc::ATTR_NOTE],
             [
                 [Cfg::CODE_TYPE_CALC_PENSION, 'Pension funds payments calculation.'],
+                [Cfg::CODE_TYPE_CALC_PENSION_CLEANUP, 'Pension funds cleanup calculation.'],
                 [Cfg::CODE_TYPE_CALC_PENSION_PERCENT, 'Pension funds interest calculation.'],
                 [Cfg::CODE_TYPE_CALC_PROC_FEE, 'Processing fee calculation.']
             ]

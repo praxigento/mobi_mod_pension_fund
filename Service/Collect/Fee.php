@@ -6,6 +6,7 @@
 namespace Praxigento\PensionFund\Service\Collect;
 
 use Praxigento\Accounting\Repo\Entity\Data\Operation as EOper;
+use Praxigento\BonusBase\Repo\Entity\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\Calc as ACalc;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation as ACreateOper;
@@ -27,6 +28,8 @@ class Fee
     private $repoBonDwnl;
     /** @var \Praxigento\BonusBase\Repo\Entity\Calculation */
     private $repoCalc;
+    /** @var \Praxigento\BonusBase\Repo\Entity\Log\Opers */
+    private $repoLogOper;
     /** @var \Praxigento\Accounting\Repo\Entity\Type\Asset */
     private $repoTypeAsset;
     /** @var \Praxigento\Accounting\Repo\Entity\Type\Operation */
@@ -38,6 +41,7 @@ class Fee
         \Praxigento\Accounting\Repo\Entity\Type\Asset $repoTypeAsset,
         \Praxigento\Accounting\Repo\Entity\Type\Operation $repoTypeOper,
         \Praxigento\BonusBase\Repo\Entity\Calculation $repoCalc,
+        \Praxigento\BonusBase\Repo\Entity\Log\Opers $repoLogOper,
         \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
@@ -48,6 +52,7 @@ class Fee
         $this->repoTypeAsset = $repoTypeAsset;
         $this->repoTypeOper = $repoTypeOper;
         $this->repoCalc = $repoCalc;
+        $this->repoLogOper = $repoLogOper;
         $this->repoBonDwnl = $repoBonDwnl;
         $this->hlpPeriod = $hlpPeriod;
         $this->servCalcDep = $servCalcDep;
@@ -85,6 +90,8 @@ class Fee
         $fees = $this->ownCalc->exec($totals, $ranks);
         $period = substr($dsEnd, 0, 6);
         $operId = $this->ownCreateOper->exec($fees, $period);
+        /* register operation in log then mark calculation as complete */
+        $this->saveLogOper($operId, $feeCalcId);
         $this->repoCalc->markComplete($feeCalcId);
         /** compose result */
         $result = new AResponse();
@@ -193,5 +200,20 @@ class Fee
             $result[$custId] = $rankId;
         }
         return $result;
+    }
+
+    /**
+     * Bind operation with calculation.
+     *
+     * @param int $operId
+     * @param int $calcId
+     * @throws \Exception
+     */
+    private function saveLogOper($operId, $calcId)
+    {
+        $entity = new ELogOper();
+        $entity->setOperId($operId);
+        $entity->setCalcId($calcId);
+        $this->repoLogOper->create($entity);
     }
 }

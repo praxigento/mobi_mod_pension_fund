@@ -9,6 +9,7 @@
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
+                <item name="prxgt:pension:collect:assets" xsi:type="object">\Praxigento\PensionFund\Cli\Collect\PensionAssets</item>
                 <item name="prxgt:pension:collect:fee" xsi:type="object">\Praxigento\PensionFund\Cli\Collect\ProcessingFee</item>
             </argument>
         </arguments>

@@ -23,17 +23,17 @@
                       }
                     }
                   },
-                  "DateSince": {
-                    "alias": "date_since",
-                    "comment": "Date when customer was joined to the program.",
+                  "PeriodSince": {
+                    "alias": "period_since",
+                    "comment": "Period when customer was joined to the program (YYYYMM).",
                     "nullable": false,
                     "type": {
-                      "datetime": {}
+                      "type": {"text": {"length": 6}}
                     }
                   },
-                  "DateTerminated": {
-                    "alias": "date_term",
-                    "comment": "Date when customer was cancelled from the program (inactivity reason).",
+                  "PeriodTerminated": {
+                    "alias": "period_term",
+                    "comment": "Period when customer was cancelled from the program for inactivity reason (YYYYMM).",
                     "nullable": true,
                     "type": {
                       "datetime": {}

@@ -20,16 +20,24 @@ class Assets
     private $ownGetQual;
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee */
     private $qbGetFee;
+    /** @var \Praxigento\PensionFund\Repo\Entity\Registry */
+    private $repoReg;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
+    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\CreateOperation */
+    private $ownCreateOper;
 
     public function __construct(
+        \Praxigento\PensionFund\Repo\Entity\Registry $repoReg,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee $qbGetFee,
+        \Praxigento\PensionFund\Service\Collect\Assets\Own\CreateOperation $ownCreateOper,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified $ownGetQual
     ) {
+        $this->repoReg = $repoReg;
         $this->servCalcDep = $servCalcDep;
         $this->qbGetFee = $qbGetFee;
+        $this->ownCreateOper = $ownCreateOper;
         $this->ownGetQual = $ownGetQual;
     }
 
@@ -52,15 +60,33 @@ class Assets
          * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $feeCalc
          */
         list($pensPeriod, $pensCalc, $cmprsCalc, $feeCalc) = $this->getCalcData();
+        $dsEnd = $pensPeriod->getDstampEnd();
         $cmprsCalcId = $cmprsCalc->getId();
         $feeCalcId = $feeCalc->getId();
-        $ranks = $this->ownGetQual->exec($cmprsCalcId);
+        $qualified = $this->ownGetQual->exec($cmprsCalcId);
         $fee = $this->getFee($feeCalcId);
+        $registry = $this->getPensionRegistry();
+        $period = substr($dsEnd, 0, 6);
+        $this->ownCreateOper->exec($registry, $qualified, $fee, $period);
         /** compose result */
         $result = new AResponse();
         return $result;
     }
 
+    /**
+     * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry[]
+     */
+    private function getPensionRegistry()
+    {
+        $result = [];
+        $items = $this->repoReg->get();
+        /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $item */
+        foreach ($items as $item) {
+            $custId = $item->getCustomerRef();
+            $result[$custId] = $item;
+        }
+        return $result;
+    }
     /**
      * Get data for period & related calculations.
      *

@@ -13,14 +13,15 @@ class Registry
 {
     const ATTR_AMOUNT_IN = 'amount_in';
     const ATTR_AMOUNT_PERCENT = 'amount_percent';
+    const ATTR_AMOUNT_RETURNED = 'amount_returned';
     const ATTR_BALANCE_CLOSE = 'balance_close';
     const ATTR_BALANCE_OPEN = 'balance_open';
     const ATTR_CUSTOMER_REF = 'customer_ref';
-    const ATTR_DATE_SINCE = 'date_since';
-    const ATTR_DATE_TERM = 'date_term';
     const ATTR_MONTHS_INACT = 'months_inact';
     const ATTR_MONTHS_LEFT = 'months_left';
     const ATTR_MONTHS_TOTAL = 'months_total';
+    const ATTR_PERIOD_SINCE = 'period_since';
+    const ATTR_PERIOD_TERM = 'period_term';
     const ENTITY_NAME = 'prxgt_pens_reg';
 
     /** @return float */
@@ -34,6 +35,13 @@ class Registry
     public function getAmountPercent()
     {
         $result = parent::get(self::ATTR_AMOUNT_PERCENT);
+        return $result;
+    }
+
+    /** @return float */
+    public function getAmountReturned()
+    {
+        $result = parent::get(self::ATTR_AMOUNT_RETURNED);
         return $result;
     }
 
@@ -58,20 +66,6 @@ class Registry
         return $result;
     }
 
-    /** @return string */
-    public function getDateSince()
-    {
-        $result = parent::get(self::ATTR_DATE_SINCE);
-        return $result;
-    }
-
-    /** @return string */
-    public function getDateTerm()
-    {
-        $result = parent::get(self::ATTR_DATE_TERM);
-        return $result;
-    }
-
     /** @return int */
     public function getMonthsInact()
     {
@@ -93,6 +87,20 @@ class Registry
         return $result;
     }
 
+    /** @return string */
+    public function getPeriodSince()
+    {
+        $result = parent::get(self::ATTR_PERIOD_SINCE);
+        return $result;
+    }
+
+    /** @return string */
+    public function getPeriodTerm()
+    {
+        $result = parent::get(self::ATTR_PERIOD_TERM);
+        return $result;
+    }
+
     public static function getPrimaryKeyAttrs()
     {
         return [self::ATTR_CUSTOMER_REF];
@@ -108,6 +116,12 @@ class Registry
     public function setAmountPercent($data)
     {
         parent::set(self::ATTR_AMOUNT_PERCENT, $data);
+    }
+
+    /** @param float $data */
+    public function setAmountReturned($data)
+    {
+        parent::set(self::ATTR_AMOUNT_RETURNED, $data);
     }
 
     /** @param float $data */
@@ -128,18 +142,6 @@ class Registry
         parent::set(self::ATTR_CUSTOMER_REF, $data);
     }
 
-    /** @param string $data */
-    public function setDateSince($data)
-    {
-        parent::set(self::ATTR_DATE_SINCE, $data);
-    }
-
-    /** @param float $data */
-    public function setDateTerm($data)
-    {
-        parent::set(self::ATTR_DATE_TERM, $data);
-    }
-
     /** @param int $data */
     public function setMonthsInact($data)
     {
@@ -156,6 +158,18 @@ class Registry
     public function setMonthsTotal($data)
     {
         parent::set(self::ATTR_MONTHS_TOTAL, $data);
+    }
+
+    /** @param string $data */
+    public function setPeriodSince($data)
+    {
+        parent::set(self::ATTR_PERIOD_SINCE, $data);
+    }
+
+    /** @param float $data */
+    public function setPeriodTerm($data)
+    {
+        parent::set(self::ATTR_PERIOD_TERM, $data);
     }
 
 }

@@ -43,7 +43,7 @@ class PensionAssets
 //        $operId = $resp->getOperationId();
 //        $output->writeln("<info>Processing fee operation #$operId is created.<info>");
 
-        $this->manTrans->commit($def);
+        $this->manTrans->rollback($def);
         $output->writeln('<info>Command is completed.<info>');
     }
 }

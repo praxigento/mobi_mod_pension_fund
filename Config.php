@@ -19,5 +19,6 @@ class Config
     const CODE_TYPE_OPER_PENSION_CLEANUP = 'PENSION_CLEANUP';
     const CODE_TYPE_OPER_PENSION_PERCENT = 'PENSION_PERCENT';
     const CODE_TYPE_OPER_PROC_FEE = 'PROC_FEE';
+    const DEF_PENSION_INTEREST_PERCENT = 0.03;
     const MODULE = 'Praxigento_PensionFund';
 }

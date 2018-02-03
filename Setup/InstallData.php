@@ -61,8 +61,6 @@ class InstallData
             [TypeCalc::ATTR_CODE, TypeCalc::ATTR_NOTE],
             [
                 [Cfg::CODE_TYPE_CALC_PENSION, 'Pension funds payments calculation.'],
-                [Cfg::CODE_TYPE_CALC_PENSION_CLEANUP, 'Pension funds cleanup calculation.'],
-                [Cfg::CODE_TYPE_CALC_PENSION_PERCENT, 'Pension funds interest calculation.'],
                 [Cfg::CODE_TYPE_CALC_PROC_FEE, 'Processing fee calculation.']
             ]
         );

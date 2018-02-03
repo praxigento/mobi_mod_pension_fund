@@ -43,8 +43,13 @@ class PensionAssets
         $operIdIncome = $resp->getOperIdIncome();
         $operIdPercent = $resp->getOperIdPercent();
         $operIdCleanup = $resp->getOperIdCleanup();
+        if (!is_null($operIdCleanup)) {
+            $msg = "(income: #$operIdIncome, percent: #$operIdPercent, cleanup: #$operIdCleanup)";
+        } else {
+            $msg = "(income: #$operIdIncome, percent: #$operIdPercent)";
+        }
         $output->writeln(
-            "<info>Pension assets processing operations (#$operIdIncome, #$operIdPercent, #$operIdCleanup) are created.<info>"
+            "<info>Pension assets processing operations $msg are created.<info>"
         );
 
         $this->manTrans->commit($def);

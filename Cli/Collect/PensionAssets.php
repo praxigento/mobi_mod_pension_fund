@@ -40,10 +40,14 @@ class PensionAssets
 
         $req = new \Praxigento\PensionFund\Service\Collect\Assets\Request();
         $resp = $this->servCollectAssets->exec($req);
-//        $operId = $resp->getOperationId();
-//        $output->writeln("<info>Processing fee operation #$operId is created.<info>");
+        $operIdIncome = $resp->getOperIdIncome();
+        $operIdPercent = $resp->getOperIdPercent();
+        $operIdCleanup = $resp->getOperIdCleanup();
+        $output->writeln(
+            "<info>Pension assets processing operations (#$operIdIncome, #$operIdPercent, #$operIdCleanup) are created.<info>"
+        );
 
-        $this->manTrans->rollback($def);
+        $this->manTrans->commit($def);
         $output->writeln('<info>Command is completed.<info>');
     }
 }

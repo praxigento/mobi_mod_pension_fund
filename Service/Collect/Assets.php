@@ -5,6 +5,7 @@
 
 namespace Praxigento\PensionFund\Service\Collect;
 
+use Praxigento\BonusBase\Repo\Entity\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee as QBGetFee;
 use Praxigento\PensionFund\Service\Collect\Assets\Request as ARequest;
@@ -18,27 +19,38 @@ class Assets
 {
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified */
     private $ownGetQual;
+    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessQualified */
+    private $ownProcQual;
+    private $ownProcUnqual;
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee */
     private $qbGetFee;
+    /** @var \Praxigento\BonusBase\Repo\Entity\Calculation */
+    private $repoCalc;
+    /** @var \Praxigento\BonusBase\Repo\Entity\Log\Opers */
+    private $repoLogOper;
     /** @var \Praxigento\PensionFund\Repo\Entity\Registry */
     private $repoReg;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
-    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\CreateOperation */
-    private $ownCreateOper;
 
     public function __construct(
         \Praxigento\PensionFund\Repo\Entity\Registry $repoReg,
+        \Praxigento\BonusBase\Repo\Entity\Calculation $repoCalc,
+        \Praxigento\BonusBase\Repo\Entity\Log\Opers $repoLogOper,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee $qbGetFee,
-        \Praxigento\PensionFund\Service\Collect\Assets\Own\CreateOperation $ownCreateOper,
-        \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified $ownGetQual
+        \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified $ownGetQual,
+        \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessQualified $ownProcQual,
+        \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessUnqualified $ownProcUnqual
     ) {
         $this->repoReg = $repoReg;
+        $this->repoCalc = $repoCalc;
+        $this->repoLogOper = $repoLogOper;
         $this->servCalcDep = $servCalcDep;
         $this->qbGetFee = $qbGetFee;
-        $this->ownCreateOper = $ownCreateOper;
         $this->ownGetQual = $ownGetQual;
+        $this->ownProcQual = $ownProcQual;
+        $this->ownProcUnqual = $ownProcUnqual;
     }
 
     /**
@@ -63,30 +75,28 @@ class Assets
         $dsEnd = $pensPeriod->getDstampEnd();
         $cmprsCalcId = $cmprsCalc->getId();
         $feeCalcId = $feeCalc->getId();
+        $pensCalcId = $pensCalc->getId();
         $qualified = $this->ownGetQual->exec($cmprsCalcId);
         $fee = $this->getFee($feeCalcId);
         $registry = $this->getPensionRegistry();
         $period = substr($dsEnd, 0, 6);
-        $this->ownCreateOper->exec($registry, $qualified, $fee, $period);
+        list($operIdIncome, $operIdPercent) = $this->ownProcQual->exec($registry, $qualified, $fee, $period);
+        list($operIdCleanup) = $this->ownProcUnqual->exec($registry, $qualified, $period);
+        /* register operation in log then mark calculation as complete */
+        $this->saveLogOper($operIdIncome, $pensCalcId);
+        $this->saveLogOper($operIdPercent, $pensCalcId);
+        if ($operIdCleanup) {
+            $this->saveLogOper($operIdCleanup, $pensCalcId);
+        }
+        $this->repoCalc->markComplete($pensCalcId);
         /** compose result */
         $result = new AResponse();
+        $result->setOperIdIncome($operIdIncome);
+        $result->setOperIdPercent($operIdPercent);
+        $result->setOperIdCleanup($operIdCleanup);
         return $result;
     }
 
-    /**
-     * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry[]
-     */
-    private function getPensionRegistry()
-    {
-        $result = [];
-        $items = $this->repoReg->get();
-        /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $item */
-        foreach ($items as $item) {
-            $custId = $item->getCustomerRef();
-            $result[$custId] = $item;
-        }
-        return $result;
-    }
     /**
      * Get data for period & related calculations.
      *
@@ -118,6 +128,12 @@ class Assets
         return $result;
     }
 
+    /**
+     * Retrieve processing fee operation related to the given calculation and return summary for all fees.
+     *
+     * @param $calcId
+     * @return float
+     */
     private function getFee($calcId)
     {
         $query = $this->qbGetFee->build();
@@ -128,5 +144,35 @@ class Assets
         $rs = $conn->fetchOne($query, $bind);
         $result = (float)$rs;
         return $result;
+    }
+
+    /**
+     * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry[]
+     */
+    private function getPensionRegistry()
+    {
+        $result = [];
+        $items = $this->repoReg->get();
+        /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $item */
+        foreach ($items as $item) {
+            $custId = $item->getCustomerRef();
+            $result[$custId] = $item;
+        }
+        return $result;
+    }
+
+    /**
+     * Bind operation with calculation.
+     *
+     * @param int $operId
+     * @param int $calcId
+     * @throws \Exception
+     */
+    private function saveLogOper($operId, $calcId)
+    {
+        $entity = new ELogOper();
+        $entity->setOperId($operId);
+        $entity->setCalcId($calcId);
+        $this->repoLogOper->create($entity);
     }
 }

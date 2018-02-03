@@ -28,7 +28,11 @@
                     "comment": "Period when customer was joined to the program (YYYYMM).",
                     "nullable": false,
                     "type": {
-                      "type": {"text": {"length": 6}}
+                      "type": {
+                        "text": {
+                          "length": 6
+                        }
+                      }
                     }
                   },
                   "PeriodTerminated": {
@@ -36,7 +40,9 @@
                     "comment": "Period when customer was cancelled from the program for inactivity reason (YYYYMM).",
                     "nullable": true,
                     "type": {
-                      "datetime": {}
+                      "text": {
+                        "length": 6
+                      }
                     }
                   },
                   "MonthsTotal": {
@@ -97,6 +103,17 @@
                   "AmountPercent": {
                     "alias": "amount_percent",
                     "comment": "Total percents (3%) for the last month.",
+                    "nullable": false,
+                    "type": {
+                      "numeric": {
+                        "precision": 12,
+                        "scale": 4
+                      }
+                    }
+                  },
+                  "AmountReturned": {
+                    "alias": "amount_returned",
+                    "comment": "Pension fund amount returned to the customer.",
                     "nullable": false,
                     "type": {
                       "numeric": {

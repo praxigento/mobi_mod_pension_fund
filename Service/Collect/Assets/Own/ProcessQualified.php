@@ -110,7 +110,7 @@ class ProcessQualified
         $operIdPens = $this->createOperation(Cfg::CODE_TYPE_OPER_PENSION, $transPens, $notePens);
         $operIdPercent = $this->createOperation(Cfg::CODE_TYPE_OPER_PENSION_PERCENT, $transPercent, $notePercent);
         /* save pension registry updates */
-        $this->updateRegistry($updates);
+        $this->updateRegistry($updates, $registry);
 
         /** compose result */
         return [$operIdPens, $operIdPercent];
@@ -174,13 +174,18 @@ class ProcessQualified
 
     /**
      * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $updates
+     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
      */
-    private function updateRegistry($updates)
+    private function updateRegistry($updates, $registry)
     {
         /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $one */
         foreach ($updates as $one) {
             $id = $one->getCustomerRef();
-            $this->repoReg->updateById($id, $one);
+            if (isset($registry[$id])) {
+                $this->repoReg->updateById($id, $one);
+            } else {
+                $this->repoReg->create($one);
+            }
         }
     }
 }

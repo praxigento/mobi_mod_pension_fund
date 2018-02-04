@@ -75,12 +75,13 @@ class ProcessUnqualified
 
     /**
      * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
-     * @param int[] $qualified array with IDs of the qualified customers
+     * @param int[] $qual array with IDs of the qualified customers
+     * @param int[] $unqual array with IDs of the unqualified pensioners (first timers)
      * @param string $period 'YYYYMM'
      * @return int id of the created operation
      * @throws \Exception
      */
-    public function exec($registry, $qualified, $period)
+    public function exec($registry, $qual, $unqual, $period)
     {
         /** define local working data */
         $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
@@ -88,13 +89,14 @@ class ProcessUnqualified
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $note = "Pension fund cleanup on inactivity (period #$period).";
+        $pensioners = array_merge($qual, $unqual);
 
         /** perform processing */
         $trans = [];
         /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $item */
         foreach ($registry as $item) {
             $custId = $item->getCustomerRef();
-            if (!in_array($custId, $qualified)) {
+            if (!in_array($custId, $pensioners)) {
                 list($updated, $amountClean) = $this->processItem($item, $period);
                 $this->repoReg->updateById($custId, $updated);
                 if ($amountClean > Cfg::DEF_ZERO) {

@@ -57,7 +57,6 @@ class Assets
      * @param ARequest $request
      * @return AResponse
      * @throws \Exception
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function exec($request)
     {
@@ -76,12 +75,14 @@ class Assets
         $cmprsCalcId = $cmprsCalc->getId();
         $feeCalcId = $feeCalc->getId();
         $pensCalcId = $pensCalc->getId();
-        $qualified = $this->ownGetQual->exec($cmprsCalcId);
         $fee = $this->getFee($feeCalcId);
-        $registry = $this->getPensionRegistry();
         $period = substr($dsEnd, 0, 6);
-        list($operIdIncome, $operIdPercent) = $this->ownProcQual->exec($registry, $qualified, $fee, $period);
-        list($operIdCleanup) = $this->ownProcUnqual->exec($registry, $qualified, $period);
+        /* get all qualified customers */
+        $qual = $this->ownGetQual->exec($cmprsCalcId);
+        $registry = $this->getPensionRegistry();
+        $unqual = $this->collectUnqualPensioners($registry, $qual);
+        list($operIdIncome, $operIdPercent) = $this->ownProcQual->exec($registry, $qual, $unqual, $fee, $period);
+        list($operIdCleanup) = $this->ownProcUnqual->exec($registry, $qual, $unqual, $period);
         /* register operation in log then mark calculation as complete */
         $this->saveLogOper($operIdIncome, $pensCalcId);
         $this->saveLogOper($operIdPercent, $pensCalcId);
@@ -157,6 +158,30 @@ class Assets
         foreach ($items as $item) {
             $custId = $item->getCustomerRef();
             $result[$custId] = $item;
+        }
+        return $result;
+    }
+
+    /**
+     * Collect unqualified pensioners (first timers).
+     *
+     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry on state for the end of previous period
+     * @param int[] $qualified
+     * @return int[]
+     */
+    private function collectUnqualPensioners($registry, $qualified)
+    {
+        $result = [];
+        foreach ($registry as $one) {
+            $custId = $one->getCustomerRef();
+            $isQual = in_array($custId, $qualified);
+            if (!$isQual) {
+                $monthsInact = $one->getMonthsInact();
+                if ($monthsInact <= 0) {
+                    /* this customer is unqualified first time in the year */
+                    $result[] = $custId;
+                }
+            }
         }
         return $result;
     }

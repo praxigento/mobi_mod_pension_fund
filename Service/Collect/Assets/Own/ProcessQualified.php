@@ -41,6 +41,7 @@ class ProcessQualified
         $this->servOper = $servOper;
     }
 
+
     /**
      * @param string $operTypeCode
      * @param ETrans[] $trans
@@ -62,30 +63,32 @@ class ProcessQualified
 
     /**
      * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
-     * @param int[] $qualified array with IDs of the qualified customers
+     * @param int[] $qual array with IDs of the qualified customers
+     * @param int[] $unqual array with IDs of the first time unqualified customers
      * @param float $fee total amount of the processing fee for period
      * @param string $period 'YYYYMM'
      * @return int[] IDs of the created operations ([$operIdPens, $operIdPercent])
      * @throws \Exception
      */
-    public function exec($registry, $qualified, $fee, $period)
+    public function exec($registry, $qual, $unqual, $fee, $period)
     {
         /** define local working data */
         $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
         $accIdRepres = $this->repoAcc->getRepresentativeAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
-        $totalCustomers = count($qualified);
-        $income = floor($fee / $totalCustomers * 100) / 100;
         $notePens = "Pension income for period #$period.";
         $notePercent = "Pension percents for period #$period.";
         /** perform processing */
+        $pensioners = array_merge($qual, $unqual);
+        $totalCustomers = count($pensioners);
+        $income = floor($fee / $totalCustomers * 100) / 100;
         /* prepare registry updates & pension income transactions */
         $updates = [];
         $transPens = [];
         $transPercent = [];
-        foreach ($qualified as $custId) {
-            $update = $this->prepareRegUpdate($custId, $income, $registry, $period);
+        foreach ($pensioners as $custId) {
+            $update = $this->prepareRegUpdate($custId, $income, $registry, $unqual, $period);
             $updates[] = $update;
             $accCust = $this->repoAcc->getByCustomerId($custId, $assetTypeId);
             $accIdCust = $accCust->getId();
@@ -117,16 +120,17 @@ class ProcessQualified
     }
 
     /**
-     * Prepare data to update pension registry.
+     * Prepare data to update pension registry for pensioners (qualified & first timers).
      *
-     * @param $custId
-     * @param $income
-     * @param $registry
-     * @param $period
+     * @param int $custId
+     * @param float $income
+     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
+     * @param int[] $unqual
+     * @param string $period YYYYMM
      * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry
      * @throws \Exception
      */
-    private function prepareRegUpdate($custId, $income, $registry, $period)
+    private function prepareRegUpdate($custId, $income, $registry, $unqual, $period)
     {
         if (isset($registry[$custId])) {
             $result = $registry[$custId];
@@ -145,6 +149,8 @@ class ProcessQualified
             $result->setPeriodSince($period);
             $result->setPeriodTerm(null);
         }
+        /* is this customer is qualified */
+        $isUnqual = in_array($custId, $unqual);
         /* open balance equals to the close balance for the previous period */
         $balanceOpen = (float)$result->getBalanceClose();
         /* 3% per year = 0.03 / 12 per month */
@@ -158,6 +164,9 @@ class ProcessQualified
             /* start next year */
             $monthsLeft = 12;
             $monthsInact = 0;
+        }
+        if ($isUnqual) {
+            $monthsInact++;
         }
         $monthsLeft--;
         $monthsTotal++;

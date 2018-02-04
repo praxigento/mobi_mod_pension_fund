@@ -97,7 +97,7 @@ class ProcessUnqualified
         foreach ($registry as $item) {
             $custId = $item->getCustomerRef();
             if (!in_array($custId, $pensioners)) {
-                list($updated, $amountClean) = $this->processItem($item, $period);
+                list($updated, $amountClean) = $this->processRegistryItem($item, $period);
                 $this->repoReg->updateById($custId, $updated);
                 if ($amountClean > Cfg::DEF_ZERO) {
                     $trans[] = $this->createTransaction(
@@ -127,9 +127,9 @@ class ProcessUnqualified
      * @param string $period (YYYYMM)
      * @return array [EPensReg, float]
      */
-    private function processItem($item, $period)
+    private function processRegistryItem($item, $period)
     {
-        $balanceOpen = $item->getBalanceClose();
+        $balance = $item->getBalanceClose();
         $monthsInact = $item->getMonthsInact();
         $monthsLeft = $item->getMonthsLeft();
         $monthsTotal = $item->getMonthsTotal();
@@ -147,19 +147,10 @@ class ProcessUnqualified
             if (is_null($periodTerm)) {
                 $periodTerm = $period;
             }
-            $amountClean = $balanceOpen;
-            $balanceOpen = 0;
-        } else {
-            /* this is first inactive event in the period */
-            if ($monthsLeft <= 1) {
-                /* start next year (inactivity is in the previous period) */
-                $monthsLeft = 12;
-            }
-            $monthsInact = 1;
-            $monthsLeft--;
-            $monthsTotal++;
+            $amountClean = $balance;
         }
-        $item->setBalanceOpen($balanceOpen);
+        $item->setBalanceOpen(0);
+        $item->setBalanceClose(0);
         $item->setAmountIn(0);
         $item->setAmountPercent(0);
         $item->setMonthsInact($monthsInact);

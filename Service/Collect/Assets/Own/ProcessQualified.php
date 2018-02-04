@@ -88,7 +88,8 @@ class ProcessQualified
         $transPens = [];
         $transPercent = [];
         foreach ($pensioners as $custId) {
-            $update = $this->prepareRegUpdate($custId, $income, $registry, $unqual, $period);
+            $isUnqual = in_array($custId, $unqual);
+            $update = $this->prepareRegUpdate($custId, $income, $registry, $isUnqual, $period);
             $updates[] = $update;
             $accCust = $this->repoAcc->getByCustomerId($custId, $assetTypeId);
             $accIdCust = $accCust->getId();
@@ -125,32 +126,28 @@ class ProcessQualified
      * @param int $custId
      * @param float $income
      * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
-     * @param int[] $unqual
+     * @param bool $isUnqual
      * @param string $period YYYYMM
      * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry
      * @throws \Exception
      */
-    private function prepareRegUpdate($custId, $income, $registry, $unqual, $period)
+    private function prepareRegUpdate($custId, $income, $registry, $isUnqual, $period)
     {
         if (isset($registry[$custId])) {
             $result = $registry[$custId];
+            if (!$isUnqual) {
+                $monthsInact = $result->getMonthsInact();
+                if ($monthsInact > 1) {
+                    /* this is returned customer (was kicked off program before) */
+                    $result = $this->resetRegistryEntry($result, $period);
+                }
+            }
         } else {
             /* initial data for pension registry */
             $result = new EPensReg();
-            $result->setAmountIn(0);
-            $result->setAmountPercent(0);
-            $result->setAmountReturned(0);
-            $result->setBalanceClose(0);
-            $result->setBalanceOpen(0);
             $result->setCustomerRef($custId);
-            $result->setMonthsInact(0);
-            $result->setMonthsLeft(12);
-            $result->setMonthsTotal(0);
-            $result->setPeriodSince($period);
-            $result->setPeriodTerm(null);
+            $result = $this->resetRegistryEntry($result, $period);
         }
-        /* is this customer is qualified */
-        $isUnqual = in_array($custId, $unqual);
         /* open balance equals to the close balance for the previous period */
         $balanceOpen = (float)$result->getBalanceClose();
         /* 3% per year = 0.03 / 12 per month */
@@ -181,6 +178,25 @@ class ProcessQualified
         return $result;
     }
 
+    /**
+     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry $entry
+     * @param string $period YYYYMM
+     * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry
+     */
+    private function resetRegistryEntry($entry, $period)
+    {
+        $entry->setAmountIn(0);
+        $entry->setAmountPercent(0);
+        $entry->setAmountReturned(0);
+        $entry->setBalanceClose(0);
+        $entry->setBalanceOpen(0);
+        $entry->setMonthsInact(0);
+        $entry->setMonthsLeft(12);
+        $entry->setMonthsTotal(0);
+        $entry->setPeriodSince($period);
+        $entry->setPeriodTerm(null);
+        return $entry;
+    }
     /**
      * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $updates
      * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry

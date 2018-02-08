@@ -10,6 +10,7 @@ use Praxigento\BonusBase\Repo\Entity\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\Calc as ACalc;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation as ACreateOper;
+use Praxigento\PensionFund\Service\Collect\Fee\Own\GetEuCustomers as AGetEuCust;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals as QBGetCreditTotals;
 use Praxigento\PensionFund\Service\Collect\Fee\Request as ARequest;
 use Praxigento\PensionFund\Service\Collect\Fee\Response as AResponse;
@@ -22,6 +23,8 @@ class Fee
     private $ownCalc;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation */
     private $ownCreateOper;
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\GetEuCustomers */
+    private $ownGetEuCust;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
     private $qbGetCreditTotals;
     /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
@@ -47,7 +50,8 @@ class Fee
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         QBGetCreditTotals $qbGetCreditTotals,
         ACalc $ownCalc,
-        ACreateOper $ownCreateOper
+        ACreateOper $ownCreateOper,
+        AGetEuCust $ownGetEuCust
     ) {
         $this->repoTypeAsset = $repoTypeAsset;
         $this->repoTypeOper = $repoTypeOper;
@@ -59,8 +63,8 @@ class Fee
         $this->qbGetCreditTotals = $qbGetCreditTotals;
         $this->ownCalc = $ownCalc;
         $this->ownCreateOper = $ownCreateOper;
+        $this->ownGetEuCust = $ownGetEuCust;
     }
-
 
     /**
      * @param ARequest $request
@@ -87,15 +91,18 @@ class Fee
         /* get total credit and customers ranks */
         $totals = $this->getCreditTotal($dsBegin, $dsEnd);
         $ranks = $this->getRanks($cmprsCalcId);
-        $fees = $this->ownCalc->exec($totals, $ranks);
+        $euCusts = $this->ownGetEuCust->exec();
+        list($feeDef, $feeEu) = $this->ownCalc->exec($totals, $ranks, $euCusts);
         $period = substr($dsEnd, 0, 6);
-        $operId = $this->ownCreateOper->exec($fees, $period);
+        $operIdDef = $this->ownCreateOper->exec($feeDef, $period, Cfg::CODE_TYPE_OPER_PROC_FEE_DEF);
+        $operIdEu = $this->ownCreateOper->exec($feeEu, $period, Cfg::CODE_TYPE_OPER_PROC_FEE_EU);
         /* register operation in log then mark calculation as complete */
-        $this->saveLogOper($operId, $feeCalcId);
+        $this->saveLogOper($operIdDef, $feeCalcId);
+        $this->saveLogOper($operIdEu, $feeCalcId);
         $this->repoCalc->markComplete($feeCalcId);
         /** compose result */
         $result = new AResponse();
-        $result->setOperationId($operId);
+        $result->setOperationId($operIdDef);
         return $result;
     }
 
@@ -190,7 +197,25 @@ class Fee
         return $result;
     }
 
+    /**
+     * Get customer ranks for the period.
+     *
+     * @param int $cmprsCalcId
+     * @return array [$custId=>$rankId]
+     */
     private function getRanks($cmprsCalcId)
+    {
+        $result = [];
+        $tree = $this->repoBonDwnl->getByCalcId($cmprsCalcId);
+        foreach ($tree as $one) {
+            $custId = $one->getCustomerRef();
+            $rankId = $one->getRankRef();
+            $result[$custId] = $rankId;
+        }
+        return $result;
+    }
+
+    private function getScheme()
     {
         $result = [];
         $tree = $this->repoBonDwnl->getByCalcId($cmprsCalcId);

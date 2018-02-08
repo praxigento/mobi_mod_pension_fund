@@ -39,10 +39,11 @@ class CreateOperation
     /**
      * @param array $fees
      * @param string $period 'YYYYMM'
+     * @param string $operTypeCode
      * @return int id of the created operation
      * @throws \Exception
      */
-    public function exec($fees, $period)
+    public function exec($fees, $period, $operTypeCode)
     {
         $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
         $accIdRepres = $this->repoAcc->getRepresentativeAccountId($assetTypeId);
@@ -59,12 +60,11 @@ class CreateOperation
             $tran->setValue($amount);
             $tran->setDateApplied($dateApplied);
             $note = "Processing fee for period #$period.";
-            $operType = Cfg::CODE_TYPE_OPER_PROC_FEE;
             $trans[] = $tran;
         }
         /* create operation */
         $req = new AReqOper();
-        $req->setOperationTypeCode($operType);
+        $req->setOperationTypeCode($operTypeCode);
         $req->setTransactions($trans);
         $req->setOperationNote($note);
         /** @var ARespOper $resp */

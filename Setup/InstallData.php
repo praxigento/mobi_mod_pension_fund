@@ -49,7 +49,8 @@ class InstallData
                 [Cfg::CODE_TYPE_OPER_PENSION, 'Pension funds payments.'],
                 [Cfg::CODE_TYPE_OPER_PENSION_CLEANUP, 'Pension funds cleanup payments (for inactive customers).'],
                 [Cfg::CODE_TYPE_OPER_PENSION_PERCENT, 'Pension funds interest payments.'],
-                [Cfg::CODE_TYPE_OPER_PROC_FEE, 'Processing fee.']
+                [Cfg::CODE_TYPE_OPER_PROC_FEE_DEF, 'Processing fee (except EU customers).'],
+                [Cfg::CODE_TYPE_OPER_PROC_FEE_EU, 'Processing fee (EU customers).']
             ]
         );
     }

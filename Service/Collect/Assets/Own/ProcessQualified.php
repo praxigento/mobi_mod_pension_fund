@@ -95,16 +95,16 @@ class ProcessQualified
             $accIdCust = $accCust->getId();
             /* create income transaction */
             $tranPens = new ETrans();
-            $tranPens->setDebitAccId($accIdCust);
-            $tranPens->setCreditAccId($accIdRepres);
+            $tranPens->setDebitAccId($accIdRepres);
+            $tranPens->setCreditAccId($accIdCust);
             $tranPens->setValue($update->getAmountIn());
             $tranPens->setDateApplied($dateApplied);
             $tranPens->setNote($notePens);
             $transPens[] = $tranPens;
             /* create percent transaction */
             $tranPercent = new ETrans();
-            $tranPercent->setDebitAccId($accIdCust);
-            $tranPercent->setCreditAccId($accIdRepres);
+            $tranPercent->setDebitAccId($accIdRepres);
+            $tranPercent->setCreditAccId($accIdCust);
             $tranPercent->setValue($update->getAmountIn());
             $tranPercent->setDateApplied($dateApplied);
             $tranPercent->setNote($notePercent);

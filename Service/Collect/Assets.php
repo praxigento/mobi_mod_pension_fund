@@ -140,6 +140,7 @@ class Assets
         $query = $this->qbGetFee->build();
         $conn = $query->getConnection();
         $bind = [
+            QBGetFee::BND_OPER_TYPE_CODE => Cfg::CODE_TYPE_OPER_PROC_FEE_DEF,
             QBGetFee::BND_CALC_ID => $calcId
         ];
         $rs = $conn->fetchOne($query, $bind);

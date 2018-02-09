@@ -42,9 +42,16 @@ class Calc
         $this->repoRank = $repoRank;
     }
 
-    public function exec($totals, $ranks)
+    /**
+     * @param array $totals [custId => totalBonusAmnt]
+     * @param array $ranks [custId => rankId]
+     * @param array $euCusts IDs of the EU customers
+     * @return array [$feeDef, $feeEu]
+     */
+    public function exec($totals, $ranks, $euCusts)
     {
-        $result = [];
+        $feeDef = [];
+        $feeEu = [];
         foreach ($totals as $custId => $amount) {
             if ($amount > self::MAX_LEVEL) {
                 /* calc fee for amounts > 100 */
@@ -58,10 +65,15 @@ class Calc
                 }
             }
             if ($fee > Cfg::DEF_ZERO) {
-                $result[$custId] = $fee;
+                $isEuCust = in_array($custId, $euCusts);
+                if ($isEuCust) {
+                    $feeEu[$custId] = $fee;
+                } else {
+                    $feeDef[$custId] = $fee;
+                }
             }
         }
-        return $result;
+        return [$feeDef, $feeEu];
     }
 
     /**

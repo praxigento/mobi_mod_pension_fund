@@ -9,27 +9,35 @@ use Praxigento\BonusBase\Repo\Entity\Data\Rank as ERank;
 use Praxigento\PensionFund\Config as Cfg;
 
 /**
- * Get list of qualified customers for given calculation.
+ * Get list of qualified customers for given calculation. EU customers are not participated in pension program.
  */
 class GetQualified
 {
     /** @var int[] array of the qualified ranks IDs */
     private $cacheQualRanks;
+    /** @var \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers */
+    private $fnGetEuCust;
     /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
     private $repoBonDwnl;
+    /** @var \Praxigento\Downline\Repo\Entity\Customer */
+    private $repoDwnlCust;
     /** @var \Praxigento\BonusBase\Repo\Entity\Rank */
     private $repoRank;
 
     public function __construct(
         \Praxigento\BonusBase\Repo\Entity\Rank $repoRank,
-        \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl
+        \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
+        \Praxigento\Downline\Repo\Entity\Customer $repoDwnlCust,
+        \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers $fnGetEuCust
     ) {
         $this->repoRank = $repoRank;
         $this->repoBonDwnl = $repoBonDwnl;
+        $this->repoDwnlCust = $repoDwnlCust;
+        $this->fnGetEuCust = $fnGetEuCust;
     }
 
     /**
-     * Get list of the qualified customers.
+     * Get list of the qualified customers (except EU customers).
      *
      * @param int $calcId phase1 compression calculation ID.
      * @return int[] customers ids.
@@ -38,11 +46,16 @@ class GetQualified
     {
         $result = [];
         $tree = $this->repoBonDwnl->getByCalcId($calcId);
+        $euCusts = $this->fnGetEuCust->exec();
         foreach ($tree as $one) {
-            $rankId = $one->getRankRef();
-            if ($this->isQualified($rankId)) {
-                $custId = $one->getCustomerRef();
-                $result[] = $custId;
+            $custId = $one->getCustomerRef();
+            $isEuCust = in_array($custId, $euCusts);
+            if (!$isEuCust) {
+                $rankId = $one->getRankRef();
+                if ($this->isQualified($rankId)) {
+                    $custId = $one->getCustomerRef();
+                    $result[] = $custId;
+                }
             }
         }
         return $result;

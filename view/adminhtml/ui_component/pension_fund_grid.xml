@@ -21,8 +21,7 @@
             <argument name="class" xsi:type="string">\Praxigento\Core\App\Ui\DataProvider\Grid\Base</argument>
             <argument name="name" xsi:type="string">pension_fund_grid_data_source</argument>
             <argument name="gridQueryBuilder"
-                      xsi:type="object">\Praxigento\PensionFund\Ui\DataProvider\Grid\Pension\Fund\QueryBuilder
-            </argument>
+                      xsi:type="object">\Praxigento\PensionFund\Ui\DataProvider\Grid\Pension\Fund\QueryBuilder</argument>
         </argument>
         <argument name="data" xsi:type="array">
             <item name="js_config" xsi:type="array">

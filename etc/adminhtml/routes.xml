@@ -1,0 +1,8 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="account">
+            <module name="Praxigento_PensionFund" before="Praxigento_Accounting"/>
+        </route>
+    </router>
+</config>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Praxigento_Core::mobi">
+                    <resource id="Praxigento_Core::admin">
+                        <resource id="Praxigento_Accounting::admin_accounts">
+                            <resource id="Praxigento_PensionFund::admin_accounts_pension_fund"
+                                      title="Pension Fund" sortOrder="500"/>
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

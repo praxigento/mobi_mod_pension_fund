@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Praxigento_PensionFund::accounts_pension_fund"
+             title="Pension Fund"
+             translate="title"
+             module="Praxigento_PensionFund"
+             sortOrder="500"
+             parent="Praxigento_Accounting::accounts"
+             action="account/pension_fund"
+             resource="Praxigento_PensionFund::admin_accounts_pension_fund"/>
+    </menu>
+</config>

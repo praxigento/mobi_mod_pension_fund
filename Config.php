@@ -10,6 +10,7 @@ namespace Praxigento\PensionFund;
 class Config
     extends \Praxigento\BonusHybrid\Config
 {
+    const ACL_PENSION_FUND = 'admin_accounting_pension_fund';
     const CODE_TYPE_ASSET_PENSION = 'PENSION';
     const CODE_TYPE_CALC_PENSION = 'PENSION';
     const CODE_TYPE_CALC_PROC_FEE = 'PROC_FEE';
@@ -18,5 +19,6 @@ class Config
     const CODE_TYPE_OPER_PENSION_PERCENT = 'PENSION_PERCENT';
     const CODE_TYPE_OPER_PROC_FEE = 'PROC_FEE';
     const DEF_PENSION_INTEREST_PERCENT = 0.03;
+    const MENU_PENSION_FUND = self::ACL_PENSION_FUND;
     const MODULE = 'Praxigento_PensionFund';
 }

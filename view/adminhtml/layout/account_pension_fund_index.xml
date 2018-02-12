@@ -3,7 +3,7 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="content">
-            <uiComponent name="bonus_referral_grid"/>
+            <uiComponent name="pension_fund_grid"/>
         </referenceContainer>
     </body>
 </page>

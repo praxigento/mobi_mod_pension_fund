@@ -13,27 +13,26 @@ use Praxigento\PensionFund\Repo\Entity\Data\Registry as ERegistry;
 class QueryBuilder
     extends \Praxigento\Core\App\Ui\DataProvider\Grid\Query\Builder
 {
+    /**#@+ Tables aliases for external usage ('camelCase' naming) */
     const AS_CUSTOMER_ENTITY = 'ce';
     const AS_DWNL_CUSTOMER = 'de';
-    /**#@+ Tables aliases for external usage ('camelCase' naming) */
     const AS_PENS_REG = 'pr';
     /**#@- */
+    /**#@+
+     * Aliases for data attributes.
+     */
     const A_AMOUNT_IN = 'amountIn';
     const A_AMOUNT_PERCENT = 'amountPercent';
     const A_AMOUNT_RETURNED = 'amountReturned';
     const A_BALANCE_CLOSE = 'balanceClose';
     const A_BALANCE_OPEN = 'balanceOpen';
     const A_EMAIL = 'email';
-    /**#@+
-     * Aliases for data attributes.
-     */
     const A_MLM_ID = 'mlmId';
     const A_MONTHS_INACT = 'monthsInact';
     const A_MONTHS_LEFT = 'monthsLeft';
     const A_MONTHS_TOTAL = 'monthsTotal';
     const A_PERIOD_SINCE = 'periodSince';
     const A_PERIOD_TERM = 'periodTerm';
-
     /**#@- */
 
 

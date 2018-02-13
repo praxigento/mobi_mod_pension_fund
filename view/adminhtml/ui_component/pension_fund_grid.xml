@@ -142,15 +142,6 @@
                 </item>
             </argument>
         </column>
-        <column name="custMlmId">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="dataType" xsi:type="string">number</item>
-                    <item name="filter" xsi:type="string">textRange</item>
-                    <item name="label" xsi:type="string" translate="true">Cust. MLM ID</item>
-                </item>
-            </argument>
-        </column>
         <column name="periodSince">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">

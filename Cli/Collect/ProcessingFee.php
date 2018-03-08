@@ -11,14 +11,14 @@ namespace Praxigento\PensionFund\Cli\Collect;
 class ProcessingFee
     extends \Praxigento\Core\App\Cli\Cmd\Base
 {
-    /** @var \Praxigento\Core\App\Api\Repo\Transaction\Manager */
+    /** @var \Praxigento\Core\Api\App\Repo\Transaction\Manager */
     private $manTrans;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee */
     private $servCollectFee;
 
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $manObj,
-        \Praxigento\Core\App\Api\Repo\Transaction\Manager $manTrans,
+        \Praxigento\Core\Api\App\Repo\Transaction\Manager $manTrans,
         \Praxigento\PensionFund\Service\Collect\Fee $servCollectFee
     ) {
         parent::__construct(

@@ -60,13 +60,13 @@ class ProcessUnqualified
         return $result;
     }
 
-    private function createTransaction($custId, $assetTypeId, $accIdRepres, $amount, $dateAppl, $note)
+    private function createTransaction($custId, $assetTypeId, $accIdSys, $amount, $dateAppl, $note)
     {
         $accCust = $this->repoAcc->getByCustomerId($custId, $assetTypeId);
         $accIdCust = $accCust->getId();
         $tranPens = new ETrans();
         $tranPens->setDebitAccId($accIdCust);
-        $tranPens->setCreditAccId($accIdRepres);
+        $tranPens->setCreditAccId($accIdSys);
         $tranPens->setValue($amount);
         $tranPens->setDateApplied($dateAppl);
         $tranPens->setNote($note);
@@ -85,7 +85,7 @@ class ProcessUnqualified
     {
         /** define local working data */
         $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
-        $accIdRepres = $this->repoAcc->getRepresentativeAccountId($assetTypeId);
+        $accIdSys = $this->repoAcc->getSystemAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $note = "Pension fund cleanup on inactivity (period #$period).";
@@ -103,7 +103,7 @@ class ProcessUnqualified
                     $trans[] = $this->createTransaction(
                         $custId,
                         $assetTypeId,
-                        $accIdRepres,
+                        $accIdSys,
                         $amountClean,
                         $dateApplied,
                         $note

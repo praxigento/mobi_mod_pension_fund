@@ -46,7 +46,7 @@ class CreateOperation
     public function exec($fees, $period, $operTypeCode)
     {
         $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
-        $accIdRepres = $this->repoAcc->getRepresentativeAccountId($assetTypeId);
+        $accIdSys = $this->repoAcc->getSystemAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         /* prepare bonus & fee transactions */
@@ -56,7 +56,7 @@ class CreateOperation
             $accIdCust = $accCust->getId();
             $tran = new ETrans();
             $tran->setDebitAccId($accIdCust);
-            $tran->setCreditAccId($accIdRepres);
+            $tran->setCreditAccId($accIdSys);
             $tran->setValue($amount);
             $tran->setDateApplied($dateApplied);
             $note = "Processing fee for period #$period.";

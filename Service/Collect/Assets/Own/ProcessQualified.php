@@ -74,7 +74,7 @@ class ProcessQualified
     {
         /** define local working data */
         $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
-        $accIdRepres = $this->repoAcc->getRepresentativeAccountId($assetTypeId);
+        $accIdSys = $this->repoAcc->getSystemAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $notePens = "Pension income for period #$period.";
@@ -95,7 +95,7 @@ class ProcessQualified
             $accIdCust = $accCust->getId();
             /* create income transaction */
             $tranPens = new ETrans();
-            $tranPens->setDebitAccId($accIdRepres);
+            $tranPens->setDebitAccId($accIdSys);
             $tranPens->setCreditAccId($accIdCust);
             $tranPens->setValue($update->getAmountIn());
             $tranPens->setDateApplied($dateApplied);
@@ -103,7 +103,7 @@ class ProcessQualified
             $transPens[] = $tranPens;
             /* create percent transaction */
             $tranPercent = new ETrans();
-            $tranPercent->setDebitAccId($accIdRepres);
+            $tranPercent->setDebitAccId($accIdSys);
             $tranPercent->setCreditAccId($accIdCust);
             $tranPercent->setValue($update->getAmountIn());
             $tranPercent->setDateApplied($dateApplied);

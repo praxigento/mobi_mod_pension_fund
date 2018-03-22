@@ -27,7 +27,7 @@ class Fee
     private $ownCreateOper;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
     private $qbGetCreditTotals;
-    /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
+    /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
     private $repoBonDwnl;
     /** @var \Praxigento\BonusBase\Repo\Dao\Calculation */
     private $repoCalc;
@@ -45,7 +45,7 @@ class Fee
         \Praxigento\Accounting\Repo\Dao\Type\Operation $repoTypeOper,
         \Praxigento\BonusBase\Repo\Dao\Calculation $repoCalc,
         \Praxigento\BonusBase\Repo\Dao\Log\Opers $repoLogOper,
-        \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
+        \Praxigento\BonusHybrid\Repo\Dao\Downline $repoBonDwnl,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         AGetEuCust $fnGetEuCust,

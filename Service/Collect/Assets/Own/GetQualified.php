@@ -17,7 +17,7 @@ class GetQualified
     private $cacheQualRanks;
     /** @var \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers */
     private $fnGetEuCust;
-    /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
+    /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
     private $repoBonDwnl;
     /** @var \Praxigento\Downline\Repo\Entity\Customer */
     private $repoDwnlCust;
@@ -26,7 +26,7 @@ class GetQualified
 
     public function __construct(
         \Praxigento\BonusBase\Repo\Dao\Rank $repoRank,
-        \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
+        \Praxigento\BonusHybrid\Repo\Dao\Downline $repoBonDwnl,
         \Praxigento\Downline\Repo\Entity\Customer $repoDwnlCust,
         \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers $fnGetEuCust
     ) {

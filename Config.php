@@ -7,9 +7,21 @@
 
 namespace Praxigento\PensionFund;
 
+use Praxigento\Accounting\Config as AccCfg;
+use Praxigento\BonusReferral\Config as BonRefCfg;
+use Praxigento\Pv\Config as PvCfg;
+use Praxigento\Wallet\Config as WalletCfg;
+
 class Config
     extends \Praxigento\BonusHybrid\Config
 {
+    const CODE_TYPE_ASSET_WALLET = WalletCfg::CODE_TYPE_ASSET_WALLET;
+    const CODE_TYPE_OPER_BONUS_REF_BOUNTY = BonRefCfg::CODE_TYPE_OPER_BONUS_REF_BOUNTY;
+    const CODE_TYPE_OPER_BONUS_REF_FEE = BonRefCfg::CODE_TYPE_OPER_BONUS_REF_FEE;
+    const CODE_TYPE_OPER_CHANGE_BALANCE = AccCfg::CODE_TYPE_OPER_CHANGE_BALANCE;
+    const CODE_TYPE_OPER_PV_TRANSFER = PvCfg::CODE_TYPE_OPER_PV_TRANSFER;
+    const CODE_TYPE_OPER_WALLET_SALE = WalletCfg::CODE_TYPE_OPER_WALLET_SALE;
+
     const ACL_PENSION_FUND = 'admin_accounting_pension_fund';
     const CODE_TYPE_ASSET_PENSION = 'PENSION';
     const CODE_TYPE_CALC_PENSION = 'PENSION';

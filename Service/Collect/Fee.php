@@ -6,7 +6,7 @@
 namespace Praxigento\PensionFund\Service\Collect;
 
 use Praxigento\Accounting\Repo\Data\Operation as EOper;
-use Praxigento\BonusBase\Repo\Entity\Data\Log\Opers as ELogOper;
+use Praxigento\BonusBase\Repo\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\A\GetEuCustomers as AGetEuCust;
 use Praxigento\PensionFund\Service\Collect\Fee\Own\Calc as ACalc;
@@ -29,9 +29,9 @@ class Fee
     private $qbGetCreditTotals;
     /** @var \Praxigento\BonusHybrid\Repo\Entity\Downline */
     private $repoBonDwnl;
-    /** @var \Praxigento\BonusBase\Repo\Entity\Calculation */
+    /** @var \Praxigento\BonusBase\Repo\Dao\Calculation */
     private $repoCalc;
-    /** @var \Praxigento\BonusBase\Repo\Entity\Log\Opers */
+    /** @var \Praxigento\BonusBase\Repo\Dao\Log\Opers */
     private $repoLogOper;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
     private $repoTypeAsset;
@@ -43,8 +43,8 @@ class Fee
     public function __construct(
         \Praxigento\Accounting\Repo\Dao\Type\Asset $repoTypeAsset,
         \Praxigento\Accounting\Repo\Dao\Type\Operation $repoTypeOper,
-        \Praxigento\BonusBase\Repo\Entity\Calculation $repoCalc,
-        \Praxigento\BonusBase\Repo\Entity\Log\Opers $repoLogOper,
+        \Praxigento\BonusBase\Repo\Dao\Calculation $repoCalc,
+        \Praxigento\BonusBase\Repo\Dao\Log\Opers $repoLogOper,
         \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
@@ -79,9 +79,9 @@ class Fee
 
         /** perform processing */
         /**
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Period $feePeriod
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $feeCalc
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $cmprsCalc
+         * @var \Praxigento\BonusBase\Repo\Data\Period $feePeriod
+         * @var \Praxigento\BonusBase\Repo\Data\Calculation $feeCalc
+         * @var \Praxigento\BonusBase\Repo\Data\Calculation $cmprsCalc
          */
         list($feePeriod, $feeCalc, $cmprsCalc) = $this->getCalcData();
         $dsBegin = $feePeriod->getDstampBegin();
@@ -119,9 +119,9 @@ class Fee
         $req->setBaseCalcTypeCode(Cfg::CODE_TYPE_CALC_BONUS_INFINITY_EU);
         $req->setDepCalcTypeCode(Cfg::CODE_TYPE_CALC_PROC_FEE);
         $resp = $this->servCalcDep->exec($req);
-        /** @var \Praxigento\BonusBase\Repo\Entity\Data\Period $periodData */
+        /** @var \Praxigento\BonusBase\Repo\Data\Period $periodData */
         $periodData = $resp->getDepPeriodData();
-        /** @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $calcData */
+        /** @var \Praxigento\BonusBase\Repo\Data\Calculation $calcData */
         $calcData = $resp->getDepCalcData();
         /* get additional calculation data */
         $periodEnd = $periodData->getDstampEnd();

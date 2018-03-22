@@ -5,7 +5,7 @@
 
 namespace Praxigento\PensionFund\Service\Collect;
 
-use Praxigento\BonusBase\Repo\Entity\Data\Log\Opers as ELogOper;
+use Praxigento\BonusBase\Repo\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee as QBGetFee;
 use Praxigento\PensionFund\Service\Collect\Assets\Request as ARequest;
@@ -24,9 +24,9 @@ class Assets
     private $ownProcUnqual;
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee */
     private $qbGetFee;
-    /** @var \Praxigento\BonusBase\Repo\Entity\Calculation */
+    /** @var \Praxigento\BonusBase\Repo\Dao\Calculation */
     private $repoCalc;
-    /** @var \Praxigento\BonusBase\Repo\Entity\Log\Opers */
+    /** @var \Praxigento\BonusBase\Repo\Dao\Log\Opers */
     private $repoLogOper;
     /** @var \Praxigento\PensionFund\Repo\Entity\Registry */
     private $repoReg;
@@ -35,8 +35,8 @@ class Assets
 
     public function __construct(
         \Praxigento\PensionFund\Repo\Entity\Registry $repoReg,
-        \Praxigento\BonusBase\Repo\Entity\Calculation $repoCalc,
-        \Praxigento\BonusBase\Repo\Entity\Log\Opers $repoLogOper,
+        \Praxigento\BonusBase\Repo\Dao\Calculation $repoCalc,
+        \Praxigento\BonusBase\Repo\Dao\Log\Opers $repoLogOper,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee $qbGetFee,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified $ownGetQual,
@@ -65,10 +65,10 @@ class Assets
 
         /** perform processing */
         /**
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Period $pensPeriod
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $pensCalc
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $cmprsCalc
-         * @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $feeCalc
+         * @var \Praxigento\BonusBase\Repo\Data\Period $pensPeriod
+         * @var \Praxigento\BonusBase\Repo\Data\Calculation $pensCalc
+         * @var \Praxigento\BonusBase\Repo\Data\Calculation $cmprsCalc
+         * @var \Praxigento\BonusBase\Repo\Data\Calculation $feeCalc
          */
         list($pensPeriod, $pensCalc, $cmprsCalc, $feeCalc) = $this->getCalcData();
         $dsEnd = $pensPeriod->getDstampEnd();
@@ -111,9 +111,9 @@ class Assets
         $req->setBaseCalcTypeCode(Cfg::CODE_TYPE_CALC_PROC_FEE);
         $req->setDepCalcTypeCode(Cfg::CODE_TYPE_CALC_PENSION);
         $resp = $this->servCalcDep->exec($req);
-        /** @var \Praxigento\BonusBase\Repo\Entity\Data\Period $pensPeriod */
+        /** @var \Praxigento\BonusBase\Repo\Data\Period $pensPeriod */
         $pensPeriod = $resp->getDepPeriodData();
-        /** @var \Praxigento\BonusBase\Repo\Entity\Data\Calculation $pensCalc */
+        /** @var \Praxigento\BonusBase\Repo\Data\Calculation $pensCalc */
         $pensCalc = $resp->getDepCalcData();
         /* get additional calculation data */
         $periodEnd = $pensPeriod->getDstampEnd();

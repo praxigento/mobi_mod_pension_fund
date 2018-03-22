@@ -5,7 +5,7 @@
 
 namespace Praxigento\PensionFund\Service\Collect\Assets\Own;
 
-use Praxigento\BonusBase\Repo\Entity\Data\Rank as ERank;
+use Praxigento\BonusBase\Repo\Data\Rank as ERank;
 use Praxigento\PensionFund\Config as Cfg;
 
 /**
@@ -21,11 +21,11 @@ class GetQualified
     private $repoBonDwnl;
     /** @var \Praxigento\Downline\Repo\Entity\Customer */
     private $repoDwnlCust;
-    /** @var \Praxigento\BonusBase\Repo\Entity\Rank */
+    /** @var \Praxigento\BonusBase\Repo\Dao\Rank */
     private $repoRank;
 
     public function __construct(
-        \Praxigento\BonusBase\Repo\Entity\Rank $repoRank,
+        \Praxigento\BonusBase\Repo\Dao\Rank $repoRank,
         \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,
         \Praxigento\Downline\Repo\Entity\Customer $repoDwnlCust,
         \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers $fnGetEuCust

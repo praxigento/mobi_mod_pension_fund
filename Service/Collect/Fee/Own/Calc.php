@@ -33,11 +33,11 @@ class Calc
     ];
     private $mapRanks;
 
-    /** @var \Praxigento\BonusBase\Repo\Entity\Rank */
+    /** @var \Praxigento\BonusBase\Repo\Dao\Rank */
     private $repoRank;
 
     public function __construct(
-        \Praxigento\BonusBase\Repo\Entity\Rank $repoRank
+        \Praxigento\BonusBase\Repo\Dao\Rank $repoRank
     ) {
         $this->repoRank = $repoRank;
     }
@@ -87,7 +87,7 @@ class Calc
         if (is_null($this->mapRanks)) {
             $this->mapRanks = [];
             $rs = $this->repoRank->get();
-            /** @var \Praxigento\BonusBase\Repo\Entity\Data\Rank $one */
+            /** @var \Praxigento\BonusBase\Repo\Data\Rank $one */
             foreach ($rs as $one) {
                 $rankId = $one->getId();
                 $rankCode = $one->getCode();

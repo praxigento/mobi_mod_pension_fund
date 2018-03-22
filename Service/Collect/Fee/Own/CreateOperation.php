@@ -7,7 +7,7 @@ namespace Praxigento\PensionFund\Service\Collect\Fee\Own;
 
 use Praxigento\Accounting\Api\Service\Operation\Request as AReqOper;
 use Praxigento\Accounting\Api\Service\Operation\Response as ARespOper;
-use Praxigento\Accounting\Repo\Entity\Data\Transaction as ETrans;
+use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
 use Praxigento\PensionFund\Config as Cfg;
 
 /**
@@ -17,16 +17,16 @@ class CreateOperation
 {
     /** @var \Praxigento\Core\Api\Helper\Period */
     private $hlpPeriod;
-    /** @var \Praxigento\Accounting\Repo\Entity\Account */
+    /** @var \Praxigento\Accounting\Repo\Dao\Account */
     private $repoAcc;
-    /** @var \Praxigento\Accounting\Repo\Entity\Type\Asset */
+    /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
     private $repoAssetType;
     /** @var \Praxigento\Accounting\Api\Service\Operation */
     private $servOper;
 
     public function __construct(
-        \Praxigento\Accounting\Repo\Entity\Account $repoAcc,
-        \Praxigento\Accounting\Repo\Entity\Type\Asset $repoAssetType,
+        \Praxigento\Accounting\Repo\Dao\Account $repoAcc,
+        \Praxigento\Accounting\Repo\Dao\Type\Asset $repoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation $servOper
     ) {

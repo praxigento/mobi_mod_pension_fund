@@ -7,8 +7,8 @@
 
 namespace Praxigento\PensionFund\Setup;
 
-use Praxigento\Accounting\Repo\Entity\Data\Type\Asset as TypeAsset;
-use Praxigento\Accounting\Repo\Entity\Data\Type\Operation as TypeOperation;
+use Praxigento\Accounting\Repo\Data\Type\Asset as TypeAsset;
+use Praxigento\Accounting\Repo\Data\Type\Operation as TypeOperation;
 use Praxigento\BonusBase\Repo\Entity\Data\Type\Calc as TypeCalc;
 use Praxigento\PensionFund\Config as Cfg;
 

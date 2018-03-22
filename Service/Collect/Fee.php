@@ -5,7 +5,7 @@
 
 namespace Praxigento\PensionFund\Service\Collect;
 
-use Praxigento\Accounting\Repo\Entity\Data\Operation as EOper;
+use Praxigento\Accounting\Repo\Data\Operation as EOper;
 use Praxigento\BonusBase\Repo\Entity\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\A\GetEuCustomers as AGetEuCust;
@@ -33,16 +33,16 @@ class Fee
     private $repoCalc;
     /** @var \Praxigento\BonusBase\Repo\Entity\Log\Opers */
     private $repoLogOper;
-    /** @var \Praxigento\Accounting\Repo\Entity\Type\Asset */
+    /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
     private $repoTypeAsset;
-    /** @var \Praxigento\Accounting\Repo\Entity\Type\Operation */
+    /** @var \Praxigento\Accounting\Repo\Dao\Type\Operation */
     private $repoTypeOper;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
 
     public function __construct(
-        \Praxigento\Accounting\Repo\Entity\Type\Asset $repoTypeAsset,
-        \Praxigento\Accounting\Repo\Entity\Type\Operation $repoTypeOper,
+        \Praxigento\Accounting\Repo\Dao\Type\Asset $repoTypeAsset,
+        \Praxigento\Accounting\Repo\Dao\Type\Operation $repoTypeOper,
         \Praxigento\BonusBase\Repo\Entity\Calculation $repoCalc,
         \Praxigento\BonusBase\Repo\Entity\Log\Opers $repoLogOper,
         \Praxigento\BonusHybrid\Repo\Entity\Downline $repoBonDwnl,

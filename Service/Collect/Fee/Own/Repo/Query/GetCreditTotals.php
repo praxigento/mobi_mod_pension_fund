@@ -5,9 +5,9 @@
 
 namespace Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query;
 
-use Praxigento\Accounting\Repo\Entity\Data\Account as EAcc;
-use Praxigento\Accounting\Repo\Entity\Data\Operation as EOper;
-use Praxigento\Accounting\Repo\Entity\Data\Transaction as ETrans;
+use Praxigento\Accounting\Repo\Data\Account as EAcc;
+use Praxigento\Accounting\Repo\Data\Operation as EOper;
+use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
 use Praxigento\Core\App\Repo\Query\Expression as AnExpression;
 
 class GetCreditTotals

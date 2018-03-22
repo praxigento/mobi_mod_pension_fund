@@ -5,9 +5,9 @@
 
 namespace Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query;
 
-use Praxigento\Accounting\Repo\Entity\Data\Operation as EOper;
-use Praxigento\Accounting\Repo\Entity\Data\Transaction as ETrans;
-use Praxigento\Accounting\Repo\Entity\Data\Type\Operation as ETypeOper;
+use Praxigento\Accounting\Repo\Data\Operation as EOper;
+use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
+use Praxigento\Accounting\Repo\Data\Type\Operation as ETypeOper;
 use Praxigento\BonusBase\Repo\Entity\Data\Log\Opers as ELogOper;
 use Praxigento\Core\App\Repo\Query\Expression as AnExpression;
 

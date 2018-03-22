@@ -6,7 +6,7 @@
 
 namespace Praxigento\PensionFund\Service\Collect\A;
 
-use Praxigento\Downline\Repo\Entity\Data\Customer as EDwnlCust;
+use Praxigento\Downline\Repo\Data\Customer as EDwnlCust;
 use Praxigento\PensionFund\Config as Cfg;
 
 /**
@@ -16,11 +16,11 @@ class GetEuCustomers
 {
     /** @var \Praxigento\BonusHybrid\Helper\IScheme */
     private $hlpScheme;
-    /** @var \Praxigento\Downline\Repo\Entity\Customer */
+    /** @var \Praxigento\Downline\Repo\Dao\Customer */
     private $repoDwnlCust;
 
     public function __construct(
-        \Praxigento\Downline\Repo\Entity\Customer $repoDwnlCust,
+        \Praxigento\Downline\Repo\Dao\Customer $repoDwnlCust,
         \Praxigento\BonusHybrid\Helper\IScheme $hlpScheme
     ) {
         $this->repoDwnlCust = $repoDwnlCust;

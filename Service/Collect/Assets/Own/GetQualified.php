@@ -19,7 +19,7 @@ class GetQualified
     private $fnGetEuCust;
     /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
     private $repoBonDwnl;
-    /** @var \Praxigento\Downline\Repo\Entity\Customer */
+    /** @var \Praxigento\Downline\Repo\Dao\Customer */
     private $repoDwnlCust;
     /** @var \Praxigento\BonusBase\Repo\Dao\Rank */
     private $repoRank;
@@ -27,7 +27,7 @@ class GetQualified
     public function __construct(
         \Praxigento\BonusBase\Repo\Dao\Rank $repoRank,
         \Praxigento\BonusHybrid\Repo\Dao\Downline $repoBonDwnl,
-        \Praxigento\Downline\Repo\Entity\Customer $repoDwnlCust,
+        \Praxigento\Downline\Repo\Dao\Customer $repoDwnlCust,
         \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers $fnGetEuCust
     ) {
         $this->repoRank = $repoRank;

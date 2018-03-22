@@ -9,7 +9,7 @@ use Praxigento\Accounting\Api\Service\Operation\Request as AReqOper;
 use Praxigento\Accounting\Api\Service\Operation\Response as ARespOper;
 use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
 use Praxigento\PensionFund\Config as Cfg;
-use Praxigento\PensionFund\Repo\Entity\Data\Registry as EPensReg;
+use Praxigento\PensionFund\Repo\Data\Registry as EPensReg;
 
 /**
  * Update registry data and create operations for pension incomes & percents for the period.
@@ -22,14 +22,14 @@ class ProcessQualified
     private $repoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
     private $repoAssetType;
-    /** @var \Praxigento\PensionFund\Repo\Entity\Registry */
+    /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
     private $repoReg;
     /** @var \Praxigento\Accounting\Api\Service\Operation */
     private $servOper;
 
     public function __construct(
         \Praxigento\Accounting\Repo\Dao\Account $repoAcc,
-        \Praxigento\PensionFund\Repo\Entity\Registry $repoReg,
+        \Praxigento\PensionFund\Repo\Dao\Registry $repoReg,
         \Praxigento\Accounting\Repo\Dao\Type\Asset $repoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation $servOper
@@ -62,7 +62,7 @@ class ProcessQualified
     }
 
     /**
-     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
+     * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry
      * @param int[] $qual array with IDs of the qualified customers
      * @param int[] $unqual array with IDs of the first time unqualified customers
      * @param float $fee total amount of the processing fee for period
@@ -125,10 +125,10 @@ class ProcessQualified
      *
      * @param int $custId
      * @param float $income
-     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
+     * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry
      * @param bool $isUnqual
      * @param string $period YYYYMM
-     * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry
+     * @return \Praxigento\PensionFund\Repo\Data\Registry
      * @throws \Exception
      */
     private function prepareRegUpdate($custId, $income, $registry, $isUnqual, $period)
@@ -179,9 +179,9 @@ class ProcessQualified
     }
 
     /**
-     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry $entry
+     * @param \Praxigento\PensionFund\Repo\Data\Registry $entry
      * @param string $period YYYYMM
-     * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry
+     * @return \Praxigento\PensionFund\Repo\Data\Registry
      */
     private function resetRegistryEntry($entry, $period)
     {
@@ -198,12 +198,12 @@ class ProcessQualified
         return $entry;
     }
     /**
-     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $updates
-     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
+     * @param \Praxigento\PensionFund\Repo\Data\Registry[] $updates
+     * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry
      */
     private function updateRegistry($updates, $registry)
     {
-        /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $one */
+        /** @var \Praxigento\PensionFund\Repo\Data\Registry $one */
         foreach ($updates as $one) {
             $id = $one->getCustomerRef();
             if (isset($registry[$id])) {

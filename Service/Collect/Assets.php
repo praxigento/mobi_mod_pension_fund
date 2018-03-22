@@ -28,13 +28,13 @@ class Assets
     private $repoCalc;
     /** @var \Praxigento\BonusBase\Repo\Dao\Log\Opers */
     private $repoLogOper;
-    /** @var \Praxigento\PensionFund\Repo\Entity\Registry */
+    /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
     private $repoReg;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
 
     public function __construct(
-        \Praxigento\PensionFund\Repo\Entity\Registry $repoReg,
+        \Praxigento\PensionFund\Repo\Dao\Registry $repoReg,
         \Praxigento\BonusBase\Repo\Dao\Calculation $repoCalc,
         \Praxigento\BonusBase\Repo\Dao\Log\Opers $repoLogOper,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
@@ -149,13 +149,13 @@ class Assets
     }
 
     /**
-     * @return \Praxigento\PensionFund\Repo\Entity\Data\Registry[]
+     * @return \Praxigento\PensionFund\Repo\Data\Registry[]
      */
     private function getPensionRegistry()
     {
         $result = [];
         $items = $this->repoReg->get();
-        /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $item */
+        /** @var \Praxigento\PensionFund\Repo\Data\Registry $item */
         foreach ($items as $item) {
             $custId = $item->getCustomerRef();
             $result[$custId] = $item;
@@ -166,7 +166,7 @@ class Assets
     /**
      * Collect unqualified pensioners (first timers).
      *
-     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry on state for the end of previous period
+     * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry on state for the end of previous period
      * @param int[] $qualified
      * @return int[]
      */

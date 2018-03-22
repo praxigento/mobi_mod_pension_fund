@@ -9,7 +9,7 @@ use Praxigento\Accounting\Api\Service\Operation\Request as AReqOper;
 use Praxigento\Accounting\Api\Service\Operation\Response as ARespOper;
 use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
 use Praxigento\PensionFund\Config as Cfg;
-use Praxigento\PensionFund\Repo\Entity\Data\Registry as EPensReg;
+use Praxigento\PensionFund\Repo\Data\Registry as EPensReg;
 
 /**
  * Update registry data and create operations for unqualified customers funds return.
@@ -22,14 +22,14 @@ class ProcessUnqualified
     private $repoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
     private $repoAssetType;
-    /** @var \Praxigento\PensionFund\Repo\Entity\Registry */
+    /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
     private $repoReg;
     /** @var \Praxigento\Accounting\Api\Service\Operation */
     private $servOper;
 
     public function __construct(
         \Praxigento\Accounting\Repo\Dao\Account $repoAcc,
-        \Praxigento\PensionFund\Repo\Entity\Registry $repoReg,
+        \Praxigento\PensionFund\Repo\Dao\Registry $repoReg,
         \Praxigento\Accounting\Repo\Dao\Type\Asset $repoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation $servOper
@@ -74,7 +74,7 @@ class ProcessUnqualified
     }
 
     /**
-     * @param \Praxigento\PensionFund\Repo\Entity\Data\Registry[] $registry
+     * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry
      * @param int[] $qual array with IDs of the qualified customers
      * @param int[] $unqual array with IDs of the unqualified pensioners (first timers)
      * @param string $period 'YYYYMM'
@@ -93,7 +93,7 @@ class ProcessUnqualified
 
         /** perform processing */
         $trans = [];
-        /** @var \Praxigento\PensionFund\Repo\Entity\Data\Registry $item */
+        /** @var \Praxigento\PensionFund\Repo\Data\Registry $item */
         foreach ($registry as $item) {
             $custId = $item->getCustomerRef();
             if (!in_array($custId, $pensioners)) {

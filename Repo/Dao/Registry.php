@@ -3,9 +3,9 @@
  * User: Alex Gusev <alex@flancer64.com>
  */
 
-namespace Praxigento\PensionFund\Repo\Entity;
+namespace Praxigento\PensionFund\Repo\Dao;
 
-use Praxigento\PensionFund\Repo\Entity\Data\Registry as Entity;
+use Praxigento\PensionFund\Repo\Data\Registry as Entity;
 
 class Registry
     extends \Praxigento\Core\App\Repo\Def\Entity

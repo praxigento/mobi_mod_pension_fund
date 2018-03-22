@@ -8,7 +8,7 @@ namespace Praxigento\PensionFund\Ui\DataProvider\Grid\Pension\Fund;
 
 use Praxigento\Downline\Repo\Data\Customer as ECustomer;
 use Praxigento\PensionFund\Config as Cfg;
-use Praxigento\PensionFund\Repo\Entity\Data\Registry as ERegistry;
+use Praxigento\PensionFund\Repo\Data\Registry as ERegistry;
 
 class QueryBuilder
     extends \Praxigento\Core\App\Ui\DataProvider\Grid\Query\Builder

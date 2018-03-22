@@ -3,7 +3,7 @@
  * User: Alex Gusev <alex@flancer64.com>
  */
 
-namespace Praxigento\PensionFund\Repo\Entity\Data;
+namespace Praxigento\PensionFund\Repo\Data;
 
 /**
  * Registry for pension fund customers.

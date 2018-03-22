@@ -7,7 +7,7 @@
 
 namespace Praxigento\PensionFund\Setup;
 
-use Praxigento\PensionFund\Repo\Entity\Data\Registry as Registry;
+use Praxigento\PensionFund\Repo\Data\Registry as Registry;
 
 class InstallSchema
     extends \Praxigento\Core\App\Setup\Schema\Base

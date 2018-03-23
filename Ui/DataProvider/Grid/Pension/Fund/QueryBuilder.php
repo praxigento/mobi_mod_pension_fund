@@ -40,18 +40,18 @@ class QueryBuilder
     {
         if (is_null($this->mapper)) {
             $map = [
-                self::A_MLM_ID => self::AS_DWNL_CUSTOMER . '.' . ECustomer::ATTR_MLM_ID,
+                self::A_MLM_ID => self::AS_DWNL_CUSTOMER . '.' . ECustomer::A_MLM_ID,
                 self::A_EMAIL => self::AS_CUSTOMER_ENTITY . '.' . Cfg::E_CUSTOMER_A_EMAIL,
-                self::A_PERIOD_SINCE => self::AS_PENS_REG . '.' . ERegistry::ATTR_PERIOD_SINCE,
-                self::A_PERIOD_TERM => self::AS_PENS_REG . '.' . ERegistry::ATTR_PERIOD_TERM,
-                self::A_MONTHS_TOTAL => self::AS_PENS_REG . '.' . ERegistry::ATTR_MONTHS_TOTAL,
-                self::A_MONTHS_INACT => self::AS_PENS_REG . '.' . ERegistry::ATTR_MONTHS_INACT,
-                self::A_MONTHS_LEFT => self::AS_PENS_REG . '.' . ERegistry::ATTR_MONTHS_LEFT,
-                self::A_BALANCE_OPEN => self::AS_PENS_REG . '.' . ERegistry::ATTR_BALANCE_OPEN,
-                self::A_AMOUNT_IN => self::AS_PENS_REG . '.' . ERegistry::ATTR_AMOUNT_IN,
-                self::A_AMOUNT_PERCENT => self::AS_PENS_REG . '.' . ERegistry::ATTR_AMOUNT_PERCENT,
-                self::A_AMOUNT_RETURNED => self::AS_PENS_REG . '.' . ERegistry::ATTR_AMOUNT_RETURNED,
-                self::A_BALANCE_CLOSE => self::AS_PENS_REG . '.' . ERegistry::ATTR_BALANCE_CLOSE
+                self::A_PERIOD_SINCE => self::AS_PENS_REG . '.' . ERegistry::A_PERIOD_SINCE,
+                self::A_PERIOD_TERM => self::AS_PENS_REG . '.' . ERegistry::A_PERIOD_TERM,
+                self::A_MONTHS_TOTAL => self::AS_PENS_REG . '.' . ERegistry::A_MONTHS_TOTAL,
+                self::A_MONTHS_INACT => self::AS_PENS_REG . '.' . ERegistry::A_MONTHS_INACT,
+                self::A_MONTHS_LEFT => self::AS_PENS_REG . '.' . ERegistry::A_MONTHS_LEFT,
+                self::A_BALANCE_OPEN => self::AS_PENS_REG . '.' . ERegistry::A_BALANCE_OPEN,
+                self::A_AMOUNT_IN => self::AS_PENS_REG . '.' . ERegistry::A_AMOUNT_IN,
+                self::A_AMOUNT_PERCENT => self::AS_PENS_REG . '.' . ERegistry::A_AMOUNT_PERCENT,
+                self::A_AMOUNT_RETURNED => self::AS_PENS_REG . '.' . ERegistry::A_AMOUNT_RETURNED,
+                self::A_BALANCE_CLOSE => self::AS_PENS_REG . '.' . ERegistry::A_BALANCE_CLOSE
             ];
             $this->mapper = new \Praxigento\Core\App\Repo\Query\Criteria\Def\Mapper($map);
         }
@@ -71,16 +71,16 @@ class QueryBuilder
         $tbl = $this->resource->getTableName(ERegistry::ENTITY_NAME);
         $as = $asPensReg;
         $cols = [
-            self::A_PERIOD_SINCE => ERegistry::ATTR_PERIOD_SINCE,
-            self::A_PERIOD_TERM => ERegistry::ATTR_PERIOD_TERM,
-            self::A_MONTHS_TOTAL => ERegistry::ATTR_MONTHS_TOTAL,
-            self::A_MONTHS_INACT => ERegistry::ATTR_MONTHS_INACT,
-            self::A_MONTHS_LEFT => ERegistry::ATTR_MONTHS_LEFT,
-            self::A_BALANCE_OPEN => ERegistry::ATTR_BALANCE_OPEN,
-            self::A_AMOUNT_IN => ERegistry::ATTR_AMOUNT_IN,
-            self::A_AMOUNT_PERCENT => ERegistry::ATTR_AMOUNT_PERCENT,
-            self::A_AMOUNT_RETURNED => ERegistry::ATTR_AMOUNT_RETURNED,
-            self::A_BALANCE_CLOSE => ERegistry::ATTR_BALANCE_CLOSE
+            self::A_PERIOD_SINCE => ERegistry::A_PERIOD_SINCE,
+            self::A_PERIOD_TERM => ERegistry::A_PERIOD_TERM,
+            self::A_MONTHS_TOTAL => ERegistry::A_MONTHS_TOTAL,
+            self::A_MONTHS_INACT => ERegistry::A_MONTHS_INACT,
+            self::A_MONTHS_LEFT => ERegistry::A_MONTHS_LEFT,
+            self::A_BALANCE_OPEN => ERegistry::A_BALANCE_OPEN,
+            self::A_AMOUNT_IN => ERegistry::A_AMOUNT_IN,
+            self::A_AMOUNT_PERCENT => ERegistry::A_AMOUNT_PERCENT,
+            self::A_AMOUNT_RETURNED => ERegistry::A_AMOUNT_RETURNED,
+            self::A_BALANCE_CLOSE => ERegistry::A_BALANCE_CLOSE
         ];
         $result->from([$as => $tbl], $cols);
 
@@ -88,9 +88,9 @@ class QueryBuilder
         $tbl = $this->resource->getTableName(ECustomer::ENTITY_NAME);
         $as = $asDwnlCust;
         $cols = [
-            self::A_MLM_ID => ECustomer::ATTR_MLM_ID
+            self::A_MLM_ID => ECustomer::A_MLM_ID
         ];
-        $cond = $as . '.' . ECustomer::ATTR_CUSTOMER_ID . '=' . $asPensReg . '.' . ERegistry::ATTR_CUSTOMER_REF;
+        $cond = $as . '.' . ECustomer::A_CUSTOMER_ID . '=' . $asPensReg . '.' . ERegistry::A_CUSTOMER_REF;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* LEFT JOIN customer_entity*/
@@ -99,7 +99,7 @@ class QueryBuilder
         $cols = [
             self::A_EMAIL => Cfg::E_CUSTOMER_A_EMAIL,
         ];
-        $cond = $as . '.' . Cfg::E_CUSTOMER_A_ENTITY_ID . '=' . $asDwnlCust . '.' . ECustomer::ATTR_CUSTOMER_ID;
+        $cond = $as . '.' . Cfg::E_CUSTOMER_A_ENTITY_ID . '=' . $asDwnlCust . '.' . ECustomer::A_CUSTOMER_ID;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         return $result;
@@ -111,7 +111,7 @@ class QueryBuilder
         /** @var \Magento\Framework\DB\Select $result */
         $result = $this->getQueryItems();
         /* ... then replace "columns" part with own expression */
-        $value = 'COUNT(' . self::AS_PENS_REG . '.' . ERegistry::ATTR_CUSTOMER_REF . ')';
+        $value = 'COUNT(' . self::AS_PENS_REG . '.' . ERegistry::A_CUSTOMER_REF . ')';
 
         /**
          * See method \Magento\Framework\DB\Select\ColumnsRenderer::render:

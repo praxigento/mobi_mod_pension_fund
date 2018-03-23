@@ -47,7 +47,7 @@ class GetCreditTotals
         /* FROM prxgt_acc_transaction */
         $tbl = $this->resource->getTableName(self::E_TRANS);
         $as = $asTrans;
-        $exp = "SUM($asTrans." . ETrans::ATTR_VALUE . ")";
+        $exp = "SUM($asTrans." . ETrans::A_VALUE . ")";
         $exp = new AnExpression($exp);
         $cols = [
             self::A_CREDIT => $exp
@@ -58,23 +58,23 @@ class GetCreditTotals
         $tbl = $this->resource->getTableName(self::E_ACC);
         $as = $asAcc;
         $cols = [
-            self::A_CUST_ID => EAcc::ATTR_CUST_ID
+            self::A_CUST_ID => EAcc::A_CUST_ID
         ];
-        $cond = $as . '.' . EAcc::ATTR_ID . '=' . $asTrans . '.' . ETrans::ATTR_CREDIT_ACC_ID;
+        $cond = $as . '.' . EAcc::A_ID . '=' . $asTrans . '.' . ETrans::A_CREDIT_ACC_ID;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* LEFT JOIN prxgt_acc_operation (to apply filters by operation type) */
         $tbl = $this->resource->getTableName(self::E_OPER);
         $as = $asOper;
         $cols = [];
-        $cond = $as . '.' . EOper::ATTR_ID . '=' . $asTrans . '.' . ETrans::ATTR_OPERATION_ID;
+        $cond = $as . '.' . EOper::A_ID . '=' . $asTrans . '.' . ETrans::A_OPERATION_ID;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* query tuning */
-        $result->group($asTrans . '.' . ETrans::ATTR_CREDIT_ACC_ID);
-        $byFrom = "$asTrans." . ETrans::ATTR_DATE_APPLIED . ">=:" . self::BND_DATE_FROM;
-        $byTo = "$asTrans." . ETrans::ATTR_DATE_APPLIED . "<:" . self::BND_DATE_TO;
-        $byAssetType = "$asAcc." . EAcc::ATTR_ASSET_TYPE_ID . "=:" . self::BND_ASSET_TYPE_ID;
+        $result->group($asTrans . '.' . ETrans::A_CREDIT_ACC_ID);
+        $byFrom = "$asTrans." . ETrans::A_DATE_APPLIED . ">=:" . self::BND_DATE_FROM;
+        $byTo = "$asTrans." . ETrans::A_DATE_APPLIED . "<:" . self::BND_DATE_TO;
+        $byAssetType = "$asAcc." . EAcc::A_ASSET_TYPE_ID . "=:" . self::BND_ASSET_TYPE_ID;
         $result->where("($byFrom) AND ($byTo) AND ($byAssetType)");
 
         return $result;

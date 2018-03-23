@@ -29,7 +29,7 @@ class InstallData
     {
         $this->_conn->insertArray(
             $this->_resource->getTableName(TypeAsset::ENTITY_NAME),
-            [TypeAsset::ATTR_CODE, TypeAsset::ATTR_NOTE, TypeAsset::ATTR_IS_VISIBLE],
+            [TypeAsset::A_CODE, TypeAsset::A_NOTE, TypeAsset::A_IS_VISIBLE],
             [
                 [
                     Cfg::CODE_TYPE_ASSET_PENSION,
@@ -44,7 +44,7 @@ class InstallData
     {
         $this->_conn->insertArray(
             $this->_resource->getTableName(TypeOperation::ENTITY_NAME),
-            [TypeOperation::ATTR_CODE, TypeOperation::ATTR_NOTE],
+            [TypeOperation::A_CODE, TypeOperation::A_NOTE],
             [
                 [Cfg::CODE_TYPE_OPER_PENSION, 'Pension funds payments.'],
                 [Cfg::CODE_TYPE_OPER_PENSION_CLEANUP, 'Pension funds cleanup payments (for inactive customers).'],
@@ -59,7 +59,7 @@ class InstallData
     {
         $this->_conn->insertArray(
             $this->_resource->getTableName(TypeCalc::ENTITY_NAME),
-            [TypeCalc::ATTR_CODE, TypeCalc::ATTR_NOTE],
+            [TypeCalc::A_CODE, TypeCalc::A_NOTE],
             [
                 [Cfg::CODE_TYPE_CALC_PENSION, 'Pension funds payments calculation.'],
                 [Cfg::CODE_TYPE_CALC_PROC_FEE, 'Processing fee calculation.']

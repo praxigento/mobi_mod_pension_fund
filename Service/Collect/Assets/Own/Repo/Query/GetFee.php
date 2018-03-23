@@ -79,28 +79,28 @@ class GetFee
         $tbl = $this->resource->getTableName(self::E_OPER);
         $as = $asOper;
         $cols = [];
-        $cond = $as . '.' . EOper::ATTR_ID . '=' . $asLog . '.' . ELogOper::ATTR_OPER_ID;
+        $cond = $as . '.' . EOper::A_ID . '=' . $asLog . '.' . ELogOper::A_OPER_ID;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* LEFT JOIN prxgt_acc_type_operation */
         $tbl = $this->resource->getTableName(self::E_TYPE_OPER);
         $as = $asType;
         $cols = [];
-        $cond = $as . '.' . ETypeOper::ATTR_ID . '=' . $asOper . '.' . EOper::ATTR_TYPE_ID;
+        $cond = $as . '.' . ETypeOper::A_ID . '=' . $asOper . '.' . EOper::A_TYPE_ID;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* LEFT JOIN prxgt_acc_transaction */
         $tbl = $this->resource->getTableName(self::E_TRANS);
         $as = $asTrans;
-        $exp = "SUM($asTrans." . ETrans::ATTR_VALUE . ")";
+        $exp = "SUM($asTrans." . ETrans::A_VALUE . ")";
         $exp = new AnExpression($exp);
         $cols = [self::A_FEE => $exp];
-        $cond = $as . '.' . ETrans::ATTR_OPERATION_ID . '=' . $asOper . '.' . EOper::ATTR_ID;
+        $cond = $as . '.' . ETrans::A_OPERATION_ID . '=' . $asOper . '.' . EOper::A_ID;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* query tuning */
-        $byOperTypeCode = "$asType." . ETypeOper::ATTR_CODE . "=:" . self::BND_OPER_TYPE_CODE;
-        $byCalcId = "$asLog." . ELogOper::ATTR_CALC_ID . "=:" . self::BND_CALC_ID;
+        $byOperTypeCode = "$asType." . ETypeOper::A_CODE . "=:" . self::BND_OPER_TYPE_CODE;
+        $byCalcId = "$asLog." . ELogOper::A_CALC_ID . "=:" . self::BND_CALC_ID;
         $result->where("($byOperTypeCode) AND ($byCalcId)");
 
         return $result;

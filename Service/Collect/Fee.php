@@ -155,7 +155,7 @@ class Fee
         $query = $this->qbGetCreditTotals->build();
         $byOperType = '(0)';
         foreach ($operTypeIds as $typeId) {
-            $cond = QBGetCreditTotals::AS_OPER . '.' . EOper::ATTR_TYPE_ID . '=' . (int)$typeId;
+            $cond = QBGetCreditTotals::AS_OPER . '.' . EOper::A_TYPE_ID . '=' . (int)$typeId;
             $byOperType .= " OR ($cond)";
         }
         $query->where($byOperType);

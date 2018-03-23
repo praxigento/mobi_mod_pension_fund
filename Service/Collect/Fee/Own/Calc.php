@@ -34,12 +34,12 @@ class Calc
     private $mapRanks;
 
     /** @var \Praxigento\BonusBase\Repo\Dao\Rank */
-    private $repoRank;
+    private $daoRank;
 
     public function __construct(
-        \Praxigento\BonusBase\Repo\Dao\Rank $repoRank
+        \Praxigento\BonusBase\Repo\Dao\Rank $daoRank
     ) {
-        $this->repoRank = $repoRank;
+        $this->daoRank = $daoRank;
     }
 
     /**
@@ -86,7 +86,7 @@ class Calc
     {
         if (is_null($this->mapRanks)) {
             $this->mapRanks = [];
-            $rs = $this->repoRank->get();
+            $rs = $this->daoRank->get();
             /** @var \Praxigento\BonusBase\Repo\Data\Rank $one */
             foreach ($rs as $one) {
                 $rankId = $one->getId();

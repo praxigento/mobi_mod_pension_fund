@@ -25,27 +25,27 @@ class Assets
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee */
     private $qbGetFee;
     /** @var \Praxigento\BonusBase\Repo\Dao\Calculation */
-    private $repoCalc;
+    private $daoCalc;
     /** @var \Praxigento\BonusBase\Repo\Dao\Log\Opers */
-    private $repoLogOper;
+    private $daoLogOper;
     /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
-    private $repoReg;
+    private $daoReg;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
 
     public function __construct(
-        \Praxigento\PensionFund\Repo\Dao\Registry $repoReg,
-        \Praxigento\BonusBase\Repo\Dao\Calculation $repoCalc,
-        \Praxigento\BonusBase\Repo\Dao\Log\Opers $repoLogOper,
+        \Praxigento\PensionFund\Repo\Dao\Registry $daoReg,
+        \Praxigento\BonusBase\Repo\Dao\Calculation $daoCalc,
+        \Praxigento\BonusBase\Repo\Dao\Log\Opers $daoLogOper,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee $qbGetFee,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified $ownGetQual,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessQualified $ownProcQual,
         \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessUnqualified $ownProcUnqual
     ) {
-        $this->repoReg = $repoReg;
-        $this->repoCalc = $repoCalc;
-        $this->repoLogOper = $repoLogOper;
+        $this->daoReg = $daoReg;
+        $this->daoCalc = $daoCalc;
+        $this->daoLogOper = $daoLogOper;
         $this->servCalcDep = $servCalcDep;
         $this->qbGetFee = $qbGetFee;
         $this->ownGetQual = $ownGetQual;
@@ -89,7 +89,7 @@ class Assets
         if ($operIdCleanup) {
             $this->saveLogOper($operIdCleanup, $pensCalcId);
         }
-        $this->repoCalc->markComplete($pensCalcId);
+        $this->daoCalc->markComplete($pensCalcId);
         /** compose result */
         $result = new AResponse();
         $result->setOperIdIncome($operIdIncome);
@@ -154,7 +154,7 @@ class Assets
     private function getPensionRegistry()
     {
         $result = [];
-        $items = $this->repoReg->get();
+        $items = $this->daoReg->get();
         /** @var \Praxigento\PensionFund\Repo\Data\Registry $item */
         foreach ($items as $item) {
             $custId = $item->getCustomerRef();
@@ -199,6 +199,6 @@ class Assets
         $entity = new ELogOper();
         $entity->setOperId($operId);
         $entity->setCalcId($calcId);
-        $this->repoLogOper->create($entity);
+        $this->daoLogOper->create($entity);
     }
 }

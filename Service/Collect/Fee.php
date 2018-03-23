@@ -28,24 +28,24 @@ class Fee
     /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
     private $qbGetCreditTotals;
     /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
-    private $repoBonDwnl;
+    private $daoBonDwnl;
     /** @var \Praxigento\BonusBase\Repo\Dao\Calculation */
-    private $repoCalc;
+    private $daoCalc;
     /** @var \Praxigento\BonusBase\Repo\Dao\Log\Opers */
-    private $repoLogOper;
+    private $daoLogOper;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
-    private $repoTypeAsset;
+    private $daoTypeAsset;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Operation */
-    private $repoTypeOper;
+    private $daoTypeOper;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
 
     public function __construct(
-        \Praxigento\Accounting\Repo\Dao\Type\Asset $repoTypeAsset,
-        \Praxigento\Accounting\Repo\Dao\Type\Operation $repoTypeOper,
-        \Praxigento\BonusBase\Repo\Dao\Calculation $repoCalc,
-        \Praxigento\BonusBase\Repo\Dao\Log\Opers $repoLogOper,
-        \Praxigento\BonusHybrid\Repo\Dao\Downline $repoBonDwnl,
+        \Praxigento\Accounting\Repo\Dao\Type\Asset $daoTypeAsset,
+        \Praxigento\Accounting\Repo\Dao\Type\Operation $daoTypeOper,
+        \Praxigento\BonusBase\Repo\Dao\Calculation $daoCalc,
+        \Praxigento\BonusBase\Repo\Dao\Log\Opers $daoLogOper,
+        \Praxigento\BonusHybrid\Repo\Dao\Downline $daoBonDwnl,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         AGetEuCust $fnGetEuCust,
@@ -53,11 +53,11 @@ class Fee
         ACalc $ownCalc,
         ACreateOper $ownCreateOper
     ) {
-        $this->repoTypeAsset = $repoTypeAsset;
-        $this->repoTypeOper = $repoTypeOper;
-        $this->repoCalc = $repoCalc;
-        $this->repoLogOper = $repoLogOper;
-        $this->repoBonDwnl = $repoBonDwnl;
+        $this->daoTypeAsset = $daoTypeAsset;
+        $this->daoTypeOper = $daoTypeOper;
+        $this->daoCalc = $daoCalc;
+        $this->daoLogOper = $daoLogOper;
+        $this->daoBonDwnl = $daoBonDwnl;
         $this->hlpPeriod = $hlpPeriod;
         $this->servCalcDep = $servCalcDep;
         $this->fnGetEuCust = $fnGetEuCust;
@@ -99,7 +99,7 @@ class Fee
         /* register operation in log then mark calculation as complete */
         $this->saveLogOper($operIdDef, $feeCalcId);
         $this->saveLogOper($operIdEu, $feeCalcId);
-        $this->repoCalc->markComplete($feeCalcId);
+        $this->daoCalc->markComplete($feeCalcId);
         /** compose result */
         $result = new AResponse();
         $result->setOperationId($operIdDef);
@@ -148,7 +148,7 @@ class Fee
     {
         $dateFrom = $this->hlpPeriod->getTimestampFrom($dsFrom);
         $dateTo = $this->hlpPeriod->getTimestampNextFrom($dsTo);
-        $assetWallet = $this->repoTypeAsset->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
+        $assetWallet = $this->daoTypeAsset->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
         $operTypeIds = $this->getOperTypesApplied();
 
         /* compose query */
@@ -187,13 +187,13 @@ class Fee
     private function getOperTypesApplied()
     {
         $result = [];
-        $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_COURTESY);
-        $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_INFINITY);
-        $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_OVERRIDE);
-        $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_PERSONAL);
-        $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_REBATE);
-        $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_SIGNUP_DEBIT);
-        $result[] = $this->repoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_TEAM);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_COURTESY);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_INFINITY);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_OVERRIDE);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_PERSONAL);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_REBATE);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_SIGNUP_DEBIT);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_TEAM);
         return $result;
     }
 
@@ -206,7 +206,7 @@ class Fee
     private function getRanks($cmprsCalcId)
     {
         $result = [];
-        $tree = $this->repoBonDwnl->getByCalcId($cmprsCalcId);
+        $tree = $this->daoBonDwnl->getByCalcId($cmprsCalcId);
         foreach ($tree as $one) {
             $custId = $one->getCustomerRef();
             $rankId = $one->getRankRef();
@@ -218,7 +218,7 @@ class Fee
     private function getScheme()
     {
         $result = [];
-        $tree = $this->repoBonDwnl->getByCalcId($cmprsCalcId);
+        $tree = $this->daoBonDwnl->getByCalcId($cmprsCalcId);
         foreach ($tree as $one) {
             $custId = $one->getCustomerRef();
             $rankId = $one->getRankRef();
@@ -239,6 +239,6 @@ class Fee
         $entity = new ELogOper();
         $entity->setOperId($operId);
         $entity->setCalcId($calcId);
-        $this->repoLogOper->create($entity);
+        $this->daoLogOper->create($entity);
     }
 }

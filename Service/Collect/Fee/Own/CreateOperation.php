@@ -18,20 +18,20 @@ class CreateOperation
     /** @var \Praxigento\Core\Api\Helper\Period */
     private $hlpPeriod;
     /** @var \Praxigento\Accounting\Repo\Dao\Account */
-    private $repoAcc;
+    private $daoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
-    private $repoAssetType;
+    private $daoAssetType;
     /** @var \Praxigento\Accounting\Api\Service\Operation */
     private $servOper;
 
     public function __construct(
-        \Praxigento\Accounting\Repo\Dao\Account $repoAcc,
-        \Praxigento\Accounting\Repo\Dao\Type\Asset $repoAssetType,
+        \Praxigento\Accounting\Repo\Dao\Account $daoAcc,
+        \Praxigento\Accounting\Repo\Dao\Type\Asset $daoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation $servOper
     ) {
-        $this->repoAcc = $repoAcc;
-        $this->repoAssetType = $repoAssetType;
+        $this->daoAcc = $daoAcc;
+        $this->daoAssetType = $daoAssetType;
         $this->hlpPeriod = $hlpPeriod;
         $this->servOper = $servOper;
     }
@@ -45,14 +45,14 @@ class CreateOperation
      */
     public function exec($fees, $period, $operTypeCode)
     {
-        $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
-        $accIdSys = $this->repoAcc->getSystemAccountId($assetTypeId);
+        $assetTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
+        $accIdSys = $this->daoAcc->getSystemAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         /* prepare bonus & fee transactions */
         $trans = [];
         foreach ($fees as $custId => $amount) {
-            $accCust = $this->repoAcc->getByCustomerId($custId, $assetTypeId);
+            $accCust = $this->daoAcc->getByCustomerId($custId, $assetTypeId);
             $accIdCust = $accCust->getId();
             $tran = new ETrans();
             $tran->setDebitAccId($accIdCust);

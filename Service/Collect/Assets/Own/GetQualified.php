@@ -18,21 +18,21 @@ class GetQualified
     /** @var \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers */
     private $fnGetEuCust;
     /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
-    private $repoBonDwnl;
+    private $daoBonDwnl;
     /** @var \Praxigento\Downline\Repo\Dao\Customer */
-    private $repoDwnlCust;
+    private $daoDwnlCust;
     /** @var \Praxigento\BonusBase\Repo\Dao\Rank */
-    private $repoRank;
+    private $daoRank;
 
     public function __construct(
-        \Praxigento\BonusBase\Repo\Dao\Rank $repoRank,
-        \Praxigento\BonusHybrid\Repo\Dao\Downline $repoBonDwnl,
-        \Praxigento\Downline\Repo\Dao\Customer $repoDwnlCust,
+        \Praxigento\BonusBase\Repo\Dao\Rank $daoRank,
+        \Praxigento\BonusHybrid\Repo\Dao\Downline $daoBonDwnl,
+        \Praxigento\Downline\Repo\Dao\Customer $daoDwnlCust,
         \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers $fnGetEuCust
     ) {
-        $this->repoRank = $repoRank;
-        $this->repoBonDwnl = $repoBonDwnl;
-        $this->repoDwnlCust = $repoDwnlCust;
+        $this->daoRank = $daoRank;
+        $this->daoBonDwnl = $daoBonDwnl;
+        $this->daoDwnlCust = $daoDwnlCust;
         $this->fnGetEuCust = $fnGetEuCust;
     }
 
@@ -45,7 +45,7 @@ class GetQualified
     public function exec($calcId)
     {
         $result = [];
-        $tree = $this->repoBonDwnl->getByCalcId($calcId);
+        $tree = $this->daoBonDwnl->getByCalcId($calcId);
         $euCusts = $this->fnGetEuCust->exec();
         foreach ($tree as $one) {
             $custId = $one->getCustomerRef();
@@ -69,7 +69,7 @@ class GetQualified
     {
         if (is_null($this->cacheQualRanks)) {
             $this->cacheQualRanks = [];
-            $all = $this->repoRank->get();
+            $all = $this->daoRank->get();
             /** @var ERank $one */
             foreach ($all as $one) {
                 $code = $one->getCode();

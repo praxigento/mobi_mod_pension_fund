@@ -19,24 +19,24 @@ class ProcessQualified
     /** @var \Praxigento\Core\Api\Helper\Period */
     private $hlpPeriod;
     /** @var \Praxigento\Accounting\Repo\Dao\Account */
-    private $repoAcc;
+    private $daoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
-    private $repoAssetType;
+    private $daoAssetType;
     /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
-    private $repoReg;
+    private $daoReg;
     /** @var \Praxigento\Accounting\Api\Service\Operation */
     private $servOper;
 
     public function __construct(
-        \Praxigento\Accounting\Repo\Dao\Account $repoAcc,
-        \Praxigento\PensionFund\Repo\Dao\Registry $repoReg,
-        \Praxigento\Accounting\Repo\Dao\Type\Asset $repoAssetType,
+        \Praxigento\Accounting\Repo\Dao\Account $daoAcc,
+        \Praxigento\PensionFund\Repo\Dao\Registry $daoReg,
+        \Praxigento\Accounting\Repo\Dao\Type\Asset $daoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation $servOper
     ) {
-        $this->repoAcc = $repoAcc;
-        $this->repoReg = $repoReg;
-        $this->repoAssetType = $repoAssetType;
+        $this->daoAcc = $daoAcc;
+        $this->daoReg = $daoReg;
+        $this->daoAssetType = $daoAssetType;
         $this->hlpPeriod = $hlpPeriod;
         $this->servOper = $servOper;
     }
@@ -73,8 +73,8 @@ class ProcessQualified
     public function exec($registry, $qual, $unqual, $fee, $period)
     {
         /** define local working data */
-        $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
-        $accIdSys = $this->repoAcc->getSystemAccountId($assetTypeId);
+        $assetTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
+        $accIdSys = $this->daoAcc->getSystemAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $notePens = "Pension income for period #$period.";
@@ -91,7 +91,7 @@ class ProcessQualified
             $isUnqual = in_array($custId, $unqual);
             $update = $this->prepareRegUpdate($custId, $income, $registry, $isUnqual, $period);
             $updates[] = $update;
-            $accCust = $this->repoAcc->getByCustomerId($custId, $assetTypeId);
+            $accCust = $this->daoAcc->getByCustomerId($custId, $assetTypeId);
             $accIdCust = $accCust->getId();
             /* create income transaction */
             $tranPens = new ETrans();
@@ -207,9 +207,9 @@ class ProcessQualified
         foreach ($updates as $one) {
             $id = $one->getCustomerRef();
             if (isset($registry[$id])) {
-                $this->repoReg->updateById($id, $one);
+                $this->daoReg->updateById($id, $one);
             } else {
-                $this->repoReg->create($one);
+                $this->daoReg->create($one);
             }
         }
     }

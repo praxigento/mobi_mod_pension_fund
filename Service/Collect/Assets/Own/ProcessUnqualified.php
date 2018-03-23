@@ -19,24 +19,24 @@ class ProcessUnqualified
     /** @var \Praxigento\Core\Api\Helper\Period */
     private $hlpPeriod;
     /** @var \Praxigento\Accounting\Repo\Dao\Account */
-    private $repoAcc;
+    private $daoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
-    private $repoAssetType;
+    private $daoAssetType;
     /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
-    private $repoReg;
+    private $daoReg;
     /** @var \Praxigento\Accounting\Api\Service\Operation */
     private $servOper;
 
     public function __construct(
-        \Praxigento\Accounting\Repo\Dao\Account $repoAcc,
-        \Praxigento\PensionFund\Repo\Dao\Registry $repoReg,
-        \Praxigento\Accounting\Repo\Dao\Type\Asset $repoAssetType,
+        \Praxigento\Accounting\Repo\Dao\Account $daoAcc,
+        \Praxigento\PensionFund\Repo\Dao\Registry $daoReg,
+        \Praxigento\Accounting\Repo\Dao\Type\Asset $daoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation $servOper
     ) {
-        $this->repoAcc = $repoAcc;
-        $this->repoReg = $repoReg;
-        $this->repoAssetType = $repoAssetType;
+        $this->daoAcc = $daoAcc;
+        $this->daoReg = $daoReg;
+        $this->daoAssetType = $daoAssetType;
         $this->hlpPeriod = $hlpPeriod;
         $this->servOper = $servOper;
     }
@@ -62,7 +62,7 @@ class ProcessUnqualified
 
     private function createTransaction($custId, $assetTypeId, $accIdSys, $amount, $dateAppl, $note)
     {
-        $accCust = $this->repoAcc->getByCustomerId($custId, $assetTypeId);
+        $accCust = $this->daoAcc->getByCustomerId($custId, $assetTypeId);
         $accIdCust = $accCust->getId();
         $tranPens = new ETrans();
         $tranPens->setDebitAccId($accIdCust);
@@ -84,8 +84,8 @@ class ProcessUnqualified
     public function exec($registry, $qual, $unqual, $period)
     {
         /** define local working data */
-        $assetTypeId = $this->repoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
-        $accIdSys = $this->repoAcc->getSystemAccountId($assetTypeId);
+        $assetTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
+        $accIdSys = $this->daoAcc->getSystemAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $note = "Pension fund cleanup on inactivity (period #$period).";
@@ -98,7 +98,7 @@ class ProcessUnqualified
             $custId = $item->getCustomerRef();
             if (!in_array($custId, $pensioners)) {
                 list($updated, $amountClean) = $this->processRegistryItem($item, $period);
-                $this->repoReg->updateById($custId, $updated);
+                $this->daoReg->updateById($custId, $updated);
                 if ($amountClean > Cfg::DEF_ZERO) {
                     $trans[] = $this->createTransaction(
                         $custId,

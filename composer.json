@@ -19,6 +19,6 @@
     }
   },
   "require": {
-    "praxigento/mobi_mod_mage2_bonus_hybrid": "dev-master"
+    "praxigento/mobi_mod_bonus_hybrid": "dev-master"
   }
 }

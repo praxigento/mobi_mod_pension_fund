@@ -29,8 +29,11 @@ class InstallData
     {
         $this->_conn->insertArray(
             $this->_resource->getTableName(TypeAsset::ENTITY_NAME),
-            [TypeAsset::A_CODE, TypeAsset::A_NOTE, TypeAsset::A_IS_VISIBLE],
             [
+                TypeAsset::A_CODE,
+                TypeAsset::A_NOTE,
+                TypeAsset::A_IS_TRANSFERABLE
+            ], [
                 [
                     Cfg::CODE_TYPE_ASSET_PENSION,
                     'Pension funds. Programmatically processing only.',

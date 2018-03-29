@@ -14,14 +14,14 @@ use Praxigento\PensionFund\Config as Cfg;
  */
 class GetEuCustomers
 {
-    /** @var \Praxigento\BonusHybrid\Helper\IScheme */
+    /** @var \Praxigento\BonusHybrid\Api\Helper\Scheme */
     private $hlpScheme;
     /** @var \Praxigento\Downline\Repo\Dao\Customer */
     private $daoDwnlCust;
 
     public function __construct(
         \Praxigento\Downline\Repo\Dao\Customer $daoDwnlCust,
-        \Praxigento\BonusHybrid\Helper\IScheme $hlpScheme
+        \Praxigento\BonusHybrid\Api\Helper\Scheme $hlpScheme
     ) {
         $this->daoDwnlCust = $daoDwnlCust;
         $this->hlpScheme = $hlpScheme;

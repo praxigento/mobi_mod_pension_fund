@@ -49,6 +49,7 @@ class CreateOperation
         $accIdSys = $this->daoAcc->getSystemAccountId($assetTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
+        $note = "Processing fee for period #$period.";
         /* prepare bonus & fee transactions */
         $trans = [];
         foreach ($fees as $custId => $amount) {
@@ -59,7 +60,6 @@ class CreateOperation
             $tran->setCreditAccId($accIdSys);
             $tran->setValue($amount);
             $tran->setDateApplied($dateApplied);
-            $note = "Processing fee for period #$period.";
             $trans[] = $tran;
         }
         /* create operation */

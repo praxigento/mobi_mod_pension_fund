@@ -8,8 +8,10 @@ namespace Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query;
 use Praxigento\Accounting\Repo\Data\Account as EAcc;
 use Praxigento\Accounting\Repo\Data\Operation as EOper;
 use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
-use Praxigento\Core\App\Repo\Query\Expression as AnExpression;
 
+/**
+ * Get total amount for aggregated bonus checks to calculate processing fee.
+ */
 class GetCreditTotals
     extends \Praxigento\Core\App\Repo\Query\Builder
 {
@@ -24,9 +26,8 @@ class GetCreditTotals
     const A_CUST_ID = 'custId';
 
     /** Bound variables names ('camelCase' naming) */
-    const BND_ASSET_TYPE_ID = 'assetTypeId';
-    const BND_DATE_FROM = 'dateFrom';       // inclusive
-    const BND_DATE_TO = 'dateTo';           // exclusive
+    const BND_DEBIT_ACC_ID = 'debitAccId';
+    const BND_OPER_ID = 'operId';
 
     /** Entities are used in the query */
     const E_ACC = EAcc::ENTITY_NAME;
@@ -44,15 +45,20 @@ class GetCreditTotals
         $asOper = self::AS_OPER;
         $asTrans = self::AS_TRANS;
 
-        /* FROM prxgt_acc_transaction */
+        /* FROM prxgt_acc_operation */
+        $tbl = $this->resource->getTableName(self::E_OPER);
+        $as = $asOper;
+        $cols = [];
+        $result->from([$as => $tbl], $cols);
+
+        /* LEFT JOIN prxgt_acc_transaction  */
         $tbl = $this->resource->getTableName(self::E_TRANS);
         $as = $asTrans;
-        $exp = "SUM($asTrans." . ETrans::A_VALUE . ")";
-        $exp = new AnExpression($exp);
         $cols = [
-            self::A_CREDIT => $exp
+            self::A_CREDIT => ETrans::A_VALUE
         ];
-        $result->from([$as => $tbl], $cols);
+        $cond = $as . '.' . ETrans::A_OPERATION_ID . '=' . $asOper . '.' . EOper::A_ID;
+        $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* LEFT JOIN prxgt_acc_account (to get customer ID) */
         $tbl = $this->resource->getTableName(self::E_ACC);
@@ -63,19 +69,10 @@ class GetCreditTotals
         $cond = $as . '.' . EAcc::A_ID . '=' . $asTrans . '.' . ETrans::A_CREDIT_ACC_ID;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
-        /* LEFT JOIN prxgt_acc_operation (to apply filters by operation type) */
-        $tbl = $this->resource->getTableName(self::E_OPER);
-        $as = $asOper;
-        $cols = [];
-        $cond = $as . '.' . EOper::A_ID . '=' . $asTrans . '.' . ETrans::A_OPERATION_ID;
-        $result->joinLeft([$as => $tbl], $cond, $cols);
-
         /* query tuning */
-        $result->group($asTrans . '.' . ETrans::A_CREDIT_ACC_ID);
-        $byFrom = "$asTrans." . ETrans::A_DATE_APPLIED . ">=:" . self::BND_DATE_FROM;
-        $byTo = "$asTrans." . ETrans::A_DATE_APPLIED . "<:" . self::BND_DATE_TO;
-        $byAssetType = "$asAcc." . EAcc::A_ASSET_TYPE_ID . "=:" . self::BND_ASSET_TYPE_ID;
-        $result->where("($byFrom) AND ($byTo) AND ($byAssetType)");
+        $byOperId = "$asOper." . EOper::A_ID . "=:" . self::BND_OPER_ID;
+        $byDebitAccId = "$asTrans." . ETrans::A_DEBIT_ACC_ID . "=:" . self::BND_DEBIT_ACC_ID;
+        $result->where("($byOperId) AND ($byDebitAccId)");
 
         return $result;
     }

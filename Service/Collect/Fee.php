@@ -5,7 +5,6 @@
 
 namespace Praxigento\PensionFund\Service\Collect;
 
-use Praxigento\Accounting\Repo\Data\Operation as EOper;
 use Praxigento\BonusBase\Repo\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\A\GetEuCustomers as AGetEuCust;
@@ -17,16 +16,8 @@ use Praxigento\PensionFund\Service\Collect\Fee\Response as AResponse;
 
 class Fee
 {
-    /** @var \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers */
-    private $fnGetEuCust;
-    /** @var \Praxigento\Core\Api\Helper\Period */
-    private $hlpPeriod;
-    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Calc */
-    private $ownCalc;
-    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation */
-    private $ownCreateOper;
-    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
-    private $qbGetCreditTotals;
+    /** @var \Praxigento\Accounting\Repo\Dao\Account */
+    private $daoAcc;
     /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
     private $daoBonDwnl;
     /** @var \Praxigento\BonusBase\Repo\Dao\Calculation */
@@ -37,10 +28,21 @@ class Fee
     private $daoTypeAsset;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Operation */
     private $daoTypeOper;
+    /** @var \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers */
+    private $fnGetEuCust;
+    /** @var \Praxigento\Core\Api\Helper\Period */
+    private $hlpPeriod;
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Calc */
+    private $ownCalc;
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation */
+    private $ownCreateOper;
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
+    private $qbGetCreditTotals;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
 
     public function __construct(
+        \Praxigento\Accounting\Repo\Dao\Account $daoAcc,
         \Praxigento\Accounting\Repo\Dao\Type\Asset $daoTypeAsset,
         \Praxigento\Accounting\Repo\Dao\Type\Operation $daoTypeOper,
         \Praxigento\BonusBase\Repo\Dao\Calculation $daoCalc,
@@ -53,6 +55,7 @@ class Fee
         ACalc $ownCalc,
         ACreateOper $ownCreateOper
     ) {
+        $this->daoAcc = $daoAcc;
         $this->daoTypeAsset = $daoTypeAsset;
         $this->daoTypeOper = $daoTypeOper;
         $this->daoCalc = $daoCalc;
@@ -81,15 +84,16 @@ class Fee
         /**
          * @var \Praxigento\BonusBase\Repo\Data\Period $feePeriod
          * @var \Praxigento\BonusBase\Repo\Data\Calculation $feeCalc
+         * @var \Praxigento\BonusBase\Repo\Data\Calculation $aggCalc
          * @var \Praxigento\BonusBase\Repo\Data\Calculation $cmprsCalc
          */
-        list($feePeriod, $feeCalc, $cmprsCalc) = $this->getCalcData();
-        $dsBegin = $feePeriod->getDstampBegin();
+        list($feePeriod, $feeCalc, $aggCalc, $cmprsCalc) = $this->getCalcData();
         $dsEnd = $feePeriod->getDstampEnd();
         $feeCalcId = $feeCalc->getId();
+        $aggCalcId = $aggCalc->getId();
         $cmprsCalcId = $cmprsCalc->getId();
         /* get total credit and customers ranks */
-        $totals = $this->getCreditTotal($dsBegin, $dsEnd);
+        $totals = $this->getCreditTotal($aggCalcId);
         $ranks = $this->getRanks($cmprsCalcId);
         $euCusts = $this->fnGetEuCust->exec();
         list($feeDef, $feeEu) = $this->ownCalc->exec($totals, $ranks, $euCusts);
@@ -109,16 +113,18 @@ class Fee
     /**
      * Get data for period & calculations.
      *
-     * @return array [$periodData, $calcData]
+     * @return array [$periodData, $calcData, $calcAggData, $calcCompressData]
      * @throws \Exception
      */
     private function getCalcData()
     {
         /* get period & calc data */
         $req = new \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent\Request();
-        $req->setBaseCalcTypeCode(Cfg::CODE_TYPE_CALC_BONUS_INFINITY_EU);
+        $req->setBaseCalcTypeCode(Cfg::CODE_TYPE_CALC_BONUS_AGGREGATE);
         $req->setDepCalcTypeCode(Cfg::CODE_TYPE_CALC_PROC_FEE);
         $resp = $this->servCalcDep->exec($req);
+        /** @var \Praxigento\BonusBase\Repo\Data\Calculation $calcAggData */
+        $calcAggData = $resp->getBaseCalcData();
         /** @var \Praxigento\BonusBase\Repo\Data\Period $periodData */
         $periodData = $resp->getDepPeriodData();
         /** @var \Praxigento\BonusBase\Repo\Data\Calculation $calcData */
@@ -132,38 +138,29 @@ class Fee
         $resp = $this->servCalcDep->exec($req);
         $calcCompressData = $resp->getBaseCalcData();
         /* compose result */
-        $result = [$periodData, $calcData, $calcCompressData];
+        $result = [$periodData, $calcData, $calcAggData, $calcCompressData];
         return $result;
     }
 
     /**
      * Get total bonus amount by customer.
      *
-     * @param $dsFrom
-     * @param $dsTo
+     * @param int $aggCalcId
      * @return array [$custId=>$amount]
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function getCreditTotal($dsFrom, $dsTo)
+    private function getCreditTotal($aggCalcId)
     {
-        $dateFrom = $this->hlpPeriod->getTimestampFrom($dsFrom);
-        $dateTo = $this->hlpPeriod->getTimestampNextFrom($dsTo);
-        $assetWallet = $this->daoTypeAsset->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
-        $operTypeIds = $this->getOperTypesApplied();
+        $assetIdWallet = $this->daoTypeAsset->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
+        $accSysId = $this->daoAcc->getSystemAccountId($assetIdWallet);
+        $operId = $this->getAggOperId($aggCalcId);
 
         /* compose query */
         $query = $this->qbGetCreditTotals->build();
-        $byOperType = '(0)';
-        foreach ($operTypeIds as $typeId) {
-            $cond = QBGetCreditTotals::AS_OPER . '.' . EOper::A_TYPE_ID . '=' . (int)$typeId;
-            $byOperType .= " OR ($cond)";
-        }
-        $query->where($byOperType);
         $conn = $query->getConnection();
         $bind = [
-            QBGetCreditTotals::BND_DATE_FROM => $dateFrom,
-            QBGetCreditTotals::BND_DATE_TO => $dateTo,
-            QBGetCreditTotals::BND_ASSET_TYPE_ID => $assetWallet
+            QBGetCreditTotals::BND_DEBIT_ACC_ID => $accSysId,
+            QBGetCreditTotals::BND_OPER_ID => $operId
         ];
         $rs = $conn->fetchAll($query, $bind);
         $result = [];
@@ -180,14 +177,17 @@ class Fee
     }
 
     /**
-     * Get IDs for operation types allowed for fee processing.
+     * Get bonus aggregation operation ID.
      *
-     * @return int[]
+     * @return int
      */
-    private function getOperTypesApplied()
+    private function getAggOperId($calcId)
     {
-        $result = [];
-        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_AGGREGATE);
+        $where = ELogOper::A_CALC_ID . '=' . (int)$calcId;
+        /** @var ELogOper $data */
+        $rs = $this->daoLogOper->get($where);
+        $data = reset($rs);
+        $result = $data->getOperId();
         return $result;
     }
 

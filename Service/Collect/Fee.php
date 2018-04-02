@@ -187,12 +187,7 @@ class Fee
     private function getOperTypesApplied()
     {
         $result = [];
-        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_COURTESY);
-        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_INFINITY);
-        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_OVERRIDE);
-        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_PERSONAL);
-        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_SIGNUP_DEBIT);
-        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_TEAM);
+        $result[] = $this->daoTypeOper->getIdByCode(Cfg::CODE_TYPE_OPER_BONUS_AGGREGATE);
         return $result;
     }
 

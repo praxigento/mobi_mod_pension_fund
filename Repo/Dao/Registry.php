@@ -8,11 +8,11 @@ namespace Praxigento\PensionFund\Repo\Dao;
 use Praxigento\PensionFund\Repo\Data\Registry as Entity;
 
 class Registry
-    extends \Praxigento\Core\App\Repo\Def\Entity
+    extends \Praxigento\Core\App\Repo\Dao
 {
     public function __construct(
         \Magento\Framework\App\ResourceConnection $resource,
-        \Praxigento\Core\App\Repo\IGeneric $daoGeneric
+        \Praxigento\Core\Api\App\Repo\Generic $daoGeneric
     ) {
         parent::__construct($resource, $daoGeneric, Entity::class);
     }

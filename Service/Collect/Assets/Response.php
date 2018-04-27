@@ -14,7 +14,7 @@ namespace Praxigento\PensionFund\Service\Collect\Assets;
  * @method void setOperIdPercent(int $data)
  */
 class Response
-    extends \Praxigento\Core\App\Service\Base\Response
+    extends \Praxigento\Core\App\Service\Response
 {
 
 }

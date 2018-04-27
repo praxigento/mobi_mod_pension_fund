@@ -10,7 +10,7 @@ namespace Praxigento\PensionFund\Service\Collect\Fee;
  * @method void setOperationId(int $data)
  */
 class Response
-    extends \Praxigento\Core\App\Service\Base\Response
+    extends \Praxigento\Core\App\Service\Response
 {
 
 }

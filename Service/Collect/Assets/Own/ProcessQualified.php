@@ -105,7 +105,7 @@ class ProcessQualified
             $tranPercent = new ETrans();
             $tranPercent->setDebitAccId($accIdSys);
             $tranPercent->setCreditAccId($accIdCust);
-            $tranPercent->setValue($update->getAmountIn());
+            $tranPercent->setValue($update->getAmountPercent());
             $tranPercent->setDateApplied($dateApplied);
             $tranPercent->setNote($notePercent);
             $transPercent[] = $tranPercent;

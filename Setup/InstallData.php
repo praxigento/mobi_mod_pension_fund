@@ -49,9 +49,10 @@ class InstallData
             $this->_resource->getTableName(TypeOperation::ENTITY_NAME),
             [TypeOperation::A_CODE, TypeOperation::A_NOTE],
             [
-                [Cfg::CODE_TYPE_OPER_PENSION, 'Pension funds payments.'],
+                [Cfg::CODE_TYPE_OPER_PENSION_INCOME, 'Pension funds incoming payments (to customer account).'],
                 [Cfg::CODE_TYPE_OPER_PENSION_CLEANUP, 'Pension funds cleanup payments (for inactive customers).'],
                 [Cfg::CODE_TYPE_OPER_PENSION_PERCENT, 'Pension funds interest payments.'],
+                [Cfg::CODE_TYPE_OPER_PENSION_RETURN, 'Pension funds return to wallet (36, 72, 120 months).'],
                 [Cfg::CODE_TYPE_OPER_PROC_FEE_DEF, 'Processing fee (except EU customers).'],
                 [Cfg::CODE_TYPE_OPER_PROC_FEE_EU, 'Processing fee (EU customers).']
             ]

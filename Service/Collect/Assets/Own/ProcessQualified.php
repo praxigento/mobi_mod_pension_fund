@@ -16,14 +16,14 @@ use Praxigento\PensionFund\Repo\Data\Registry as EPensReg;
  */
 class ProcessQualified
 {
-    /** @var \Praxigento\Core\Api\Helper\Period */
-    private $hlpPeriod;
     /** @var \Praxigento\Accounting\Repo\Dao\Account */
     private $daoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
     private $daoAssetType;
     /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
     private $daoReg;
+    /** @var \Praxigento\Core\Api\Helper\Period */
+    private $hlpPeriod;
     /** @var \Praxigento\Accounting\Api\Service\Operation */
     private $servOper;
 
@@ -51,13 +51,16 @@ class ProcessQualified
      */
     private function createOperation($operTypeCode, $trans, $note)
     {
-        $req = new AReqOper();
-        $req->setOperationTypeCode($operTypeCode);
-        $req->setTransactions($trans);
-        $req->setOperationNote($note);
-        /** @var ARespOper $resp */
-        $resp = $this->servOper->exec($req);
-        $result = $resp->getOperationId();
+        $result = null;
+        if (count($trans)) {
+            $req = new AReqOper();
+            $req->setOperationTypeCode($operTypeCode);
+            $req->setTransactions($trans);
+            $req->setOperationNote($note);
+            /** @var ARespOper $resp */
+            $resp = $this->servOper->exec($req);
+            $result = $resp->getOperationId();
+        }
         return $result;
     }
 
@@ -67,18 +70,21 @@ class ProcessQualified
      * @param int[] $unqual array with IDs of the first time unqualified customers
      * @param float $fee total amount of the processing fee for period
      * @param string $period 'YYYYMM'
-     * @return int[] IDs of the created operations ([$operIdPens, $operIdPercent])
+     * @return int[] IDs of the created operations ([$operIdPens, $operIdPercent, $operIdReturn])
      * @throws \Exception
      */
     public function exec($registry, $qual, $unqual, $fee, $period)
     {
         /** define local working data */
-        $assetTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
-        $accIdSys = $this->daoAcc->getSystemAccountId($assetTypeId);
+        $assetPensionTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
+        $accPensionIdSys = $this->daoAcc->getSystemAccountId($assetPensionTypeId);
+        $assetWalletTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
+        $accWalletIdSys = $this->daoAcc->getSystemAccountId($assetWalletTypeId);
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $notePens = "Pension income for period #$period.";
         $notePercent = "Pension percents for period #$period.";
+        $noteReturn = "Pension returns for period #$period.";
         /** perform processing */
         $pensioners = array_merge($qual, $unqual);
         $totalCustomers = count($pensioners);
@@ -87,15 +93,16 @@ class ProcessQualified
         $updates = [];
         $transPens = [];
         $transPercent = [];
+        $transReturn = [];
         foreach ($pensioners as $custId) {
             $isUnqual = in_array($custId, $unqual);
             $update = $this->prepareRegUpdate($custId, $income, $registry, $isUnqual, $period);
             $updates[] = $update;
-            $accCust = $this->daoAcc->getByCustomerId($custId, $assetTypeId);
+            $accCust = $this->daoAcc->getByCustomerId($custId, $assetPensionTypeId);
             $accIdCust = $accCust->getId();
             /* create income transaction */
             $tranPens = new ETrans();
-            $tranPens->setDebitAccId($accIdSys);
+            $tranPens->setDebitAccId($accPensionIdSys);
             $tranPens->setCreditAccId($accIdCust);
             $tranPens->setValue($update->getAmountIn());
             $tranPens->setDateApplied($dateApplied);
@@ -105,36 +112,61 @@ class ProcessQualified
             $amntPercent = $update->getAmountPercent();
             if ($amntPercent > Cfg::DEF_ZERO) {
                 $tranPercent = new ETrans();
-                $tranPercent->setDebitAccId($accIdSys);
+                $tranPercent->setDebitAccId($accPensionIdSys);
                 $tranPercent->setCreditAccId($accIdCust);
                 $tranPercent->setValue($amntPercent);
                 $tranPercent->setDateApplied($dateApplied);
                 $tranPercent->setNote($notePercent);
                 $transPercent[] = $tranPercent;
             }
+            /* create return transaction */
+            $amntReturn = $update->getAmountReturned();
+            if ($amntReturn > Cfg::DEF_ZERO) {
+                /* outgoing transaction from pension account */
+                $tranReturn = new ETrans();
+                $tranReturn->setDebitAccId($accIdCust);
+                $tranReturn->setCreditAccId($accPensionIdSys);
+                $tranReturn->setValue($amntReturn);
+                $tranReturn->setDateApplied($dateApplied);
+                $months = $update->getMonthsTotal() - 2; // see MOBI-1306
+                $note = "Pension return on $months months.";
+                $tranReturn->setNote($note);
+                $transReturn[] = $tranReturn;
+                /* incoming transaction to wallet account */
+                $accWalletCust = $this->daoAcc->getByCustomerId($custId, $assetWalletTypeId);
+                $accWalletIdCust = $accWalletCust->getId();
+                $tranReturn = new ETrans();
+                $tranReturn->setDebitAccId($accWalletIdSys);
+                $tranReturn->setCreditAccId($accWalletIdCust);
+                $tranReturn->setValue($amntReturn);
+                $tranReturn->setDateApplied($dateApplied);
+                $tranReturn->setNote($note);
+                $transReturn[] = $tranReturn;
+            }
         }
         /* create operations */
-        $operIdPens = $this->createOperation(Cfg::CODE_TYPE_OPER_PENSION, $transPens, $notePens);
+        $operIdPens = $this->createOperation(Cfg::CODE_TYPE_OPER_PENSION_INCOME, $transPens, $notePens);
         $operIdPercent = $this->createOperation(Cfg::CODE_TYPE_OPER_PENSION_PERCENT, $transPercent, $notePercent);
+        $operIdReturn = $this->createOperation(Cfg::CODE_TYPE_OPER_PENSION_RETURN, $transReturn, $noteReturn);
         /* save pension registry updates */
         $this->updateRegistry($updates, $registry);
 
         /** compose result */
-        return [$operIdPens, $operIdPercent];
+        return [$operIdPens, $operIdPercent, $operIdReturn];
     }
 
     /**
      * Prepare data to update pension registry for pensioners (qualified & first timers).
      *
      * @param int $custId
-     * @param float $income
+     * @param float $amntIn
      * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry
      * @param bool $isUnqual
      * @param string $period YYYYMM
      * @return \Praxigento\PensionFund\Repo\Data\Registry
      * @throws \Exception
      */
-    private function prepareRegUpdate($custId, $income, $registry, $isUnqual, $period)
+    private function prepareRegUpdate($custId, $amntIn, $registry, $isUnqual, $period)
     {
         if (isset($registry[$custId])) {
             $result = $registry[$custId];
@@ -154,8 +186,8 @@ class ProcessQualified
         /* open balance equals to the close balance for the previous period */
         $balanceOpen = (float)$result->getBalanceClose();
         /* 3% per year = 0.03 / 12 per month */
-        $percent = floor($balanceOpen * Cfg::DEF_PENSION_INTEREST_PERCENT / 12 * 100) / 100;
-        $balanceClose = $balanceOpen + $income + $percent;
+        $amntPercent = floor($balanceOpen * Cfg::DEF_PENSION_INTEREST_PERCENT / 12 * 100) / 100;
+        $balanceClose = $balanceOpen + $amntIn + $amntPercent;
         $monthsInact = $result->getMonthsInact();
         $monthsLeft = $result->getMonthsLeft();
         $monthsTotal = $result->getMonthsTotal();
@@ -170,10 +202,29 @@ class ProcessQualified
         }
         $monthsLeft--;
         $monthsTotal++;
+
+        /* check pension returns ("+2" - see MOBI-1306) */
+        if ($monthsTotal == (36 + 2)) {
+            $amntReturn = round($balanceClose * 0.3, 2);
+            $balanceClose -= $amntReturn;
+        } elseif ($monthsTotal == (72 + 2)) {
+            $amntReturn = round($balanceClose * 0.5, 2);
+            $balanceClose -= $amntReturn;
+        } elseif ($monthsTotal == (120 + 2)) {
+            $amntReturn = $balanceClose;
+            $balanceClose = 0;
+            /* reset customer state and start from the beginning */
+            $monthsLeft = 10;
+            $monthsTotal = 2;
+        } else {
+            $amntReturn = 0;
+        }
+
         /** compose result */
         $result->setBalanceOpen($balanceOpen);
-        $result->setAmountIn($income);
-        $result->setAmountPercent($percent);
+        $result->setAmountIn($amntIn);
+        $result->setAmountPercent($amntPercent);
+        $result->setAmountReturned($amntReturn);
         $result->setBalanceClose($balanceClose);
         $result->setMonthsInact($monthsInact);
         $result->setMonthsLeft($monthsLeft);

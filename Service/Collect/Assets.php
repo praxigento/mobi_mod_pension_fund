@@ -21,6 +21,7 @@ class Assets
     private $ownGetQual;
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessQualified */
     private $ownProcQual;
+    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessUnqualified */
     private $ownProcUnqual;
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee */
     private $qbGetFee;
@@ -81,19 +82,19 @@ class Assets
         $qual = $this->ownGetQual->exec($cmprsCalcId);
         $registry = $this->getPensionRegistry();
         $unqual = $this->collectUnqualPensioners($registry, $qual);
-        list($operIdIncome, $operIdPercent) = $this->ownProcQual->exec($registry, $qual, $unqual, $fee, $period);
+        list($operIdIncome, $operIdPercent, $operIdReturn) = $this->ownProcQual->exec($registry, $qual, $unqual, $fee, $period);
         list($operIdCleanup) = $this->ownProcUnqual->exec($registry, $qual, $unqual, $period);
         /* register operation in log then mark calculation as complete */
-        $this->saveLogOper($operIdIncome, $pensCalcId);
-        $this->saveLogOper($operIdPercent, $pensCalcId);
-        if ($operIdCleanup) {
-            $this->saveLogOper($operIdCleanup, $pensCalcId);
-        }
+        if ($operIdIncome) $this->saveLogOper($operIdIncome, $pensCalcId);
+        if ($operIdPercent) $this->saveLogOper($operIdPercent, $pensCalcId);
+        if ($operIdReturn) $this->saveLogOper($operIdReturn, $pensCalcId);
+        if ($operIdCleanup) $this->saveLogOper($operIdCleanup, $pensCalcId);
         $this->daoCalc->markComplete($pensCalcId);
         /** compose result */
         $result = new AResponse();
         $result->setOperIdIncome($operIdIncome);
         $result->setOperIdPercent($operIdPercent);
+        $result->setOperIdReturn($operIdReturn);
         $result->setOperIdCleanup($operIdCleanup);
         return $result;
     }

@@ -42,12 +42,9 @@ class PensionAssets
         $resp = $this->servCollectAssets->exec($req);
         $operIdIncome = $resp->getOperIdIncome();
         $operIdPercent = $resp->getOperIdPercent();
+        $operIdReturn = $resp->getOperIdReturn();
         $operIdCleanup = $resp->getOperIdCleanup();
-        if (!is_null($operIdCleanup)) {
-            $msg = "(income: #$operIdIncome, percent: #$operIdPercent, cleanup: #$operIdCleanup)";
-        } else {
-            $msg = "(income: #$operIdIncome, percent: #$operIdPercent)";
-        }
+        $msg = "(income: #$operIdIncome, percent: #$operIdPercent, return: #$operIdReturn, cleanup: #$operIdCleanup)";
         $output->writeln(
             "<info>Pension assets processing operations $msg are created.<info>"
         );

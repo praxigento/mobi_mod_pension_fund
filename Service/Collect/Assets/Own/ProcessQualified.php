@@ -102,13 +102,16 @@ class ProcessQualified
             $tranPens->setNote($notePens);
             $transPens[] = $tranPens;
             /* create percent transaction */
-            $tranPercent = new ETrans();
-            $tranPercent->setDebitAccId($accIdSys);
-            $tranPercent->setCreditAccId($accIdCust);
-            $tranPercent->setValue($update->getAmountPercent());
-            $tranPercent->setDateApplied($dateApplied);
-            $tranPercent->setNote($notePercent);
-            $transPercent[] = $tranPercent;
+            $amntPercent = $update->getAmountPercent();
+            if ($amntPercent > Cfg::DEF_ZERO) {
+                $tranPercent = new ETrans();
+                $tranPercent->setDebitAccId($accIdSys);
+                $tranPercent->setCreditAccId($accIdCust);
+                $tranPercent->setValue($amntPercent);
+                $tranPercent->setDateApplied($dateApplied);
+                $tranPercent->setNote($notePercent);
+                $transPercent[] = $tranPercent;
+            }
         }
         /* create operations */
         $operIdPens = $this->createOperation(Cfg::CODE_TYPE_OPER_PENSION, $transPens, $notePens);

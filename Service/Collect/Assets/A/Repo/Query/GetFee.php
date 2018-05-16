@@ -3,7 +3,7 @@
  * User: Alex Gusev <alex@flancer64.com>
  */
 
-namespace Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query;
+namespace Praxigento\PensionFund\Service\Collect\Assets\A\Repo\Query;
 
 use Praxigento\Accounting\Repo\Data\Operation as EOper;
 use Praxigento\Accounting\Repo\Data\Transaction as ETrans;

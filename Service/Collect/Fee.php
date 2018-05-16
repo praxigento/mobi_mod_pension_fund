@@ -7,10 +7,10 @@ namespace Praxigento\PensionFund\Service\Collect;
 
 use Praxigento\BonusBase\Repo\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
-use Praxigento\PensionFund\Service\Collect\A\GetEuCustomers as AGetEuCust;
-use Praxigento\PensionFund\Service\Collect\Fee\Own\Calc as ACalc;
-use Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation as ACreateOper;
-use Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals as QBGetCreditTotals;
+use Praxigento\PensionFund\Service\Collect\Z\GetEuCustomers as AGetEuCust;
+use Praxigento\PensionFund\Service\Collect\Fee\A\Calc as ACalc;
+use Praxigento\PensionFund\Service\Collect\Fee\A\CreateOperation as ACreateOper;
+use Praxigento\PensionFund\Service\Collect\Fee\A\Repo\Query\GetCreditTotals as QBGetCreditTotals;
 use Praxigento\PensionFund\Service\Collect\Fee\Request as ARequest;
 use Praxigento\PensionFund\Service\Collect\Fee\Response as AResponse;
 
@@ -28,15 +28,15 @@ class Fee
     private $daoTypeAsset;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Operation */
     private $daoTypeOper;
-    /** @var \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers */
+    /** @var \Praxigento\PensionFund\Service\Collect\Z\GetEuCustomers */
     private $fnGetEuCust;
     /** @var \Praxigento\Core\Api\Helper\Period */
     private $hlpPeriod;
-    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Calc */
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\A\Calc */
     private $ownCalc;
-    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\CreateOperation */
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\A\CreateOperation */
     private $ownCreateOper;
-    /** @var \Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query\GetCreditTotals */
+    /** @var \Praxigento\PensionFund\Service\Collect\Fee\A\Repo\Query\GetCreditTotals */
     private $qbGetCreditTotals;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;

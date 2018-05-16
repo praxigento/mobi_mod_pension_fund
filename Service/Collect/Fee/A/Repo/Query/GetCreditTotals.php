@@ -3,7 +3,7 @@
  * User: Alex Gusev <alex@flancer64.com>
  */
 
-namespace Praxigento\PensionFund\Service\Collect\Fee\Own\Repo\Query;
+namespace Praxigento\PensionFund\Service\Collect\Fee\A\Repo\Query;
 
 use Praxigento\Accounting\Repo\Data\Account as EAcc;
 use Praxigento\Accounting\Repo\Data\Operation as EOper;

@@ -3,7 +3,7 @@
  * User: Alex Gusev <alex@flancer64.com>
  */
 
-namespace Praxigento\PensionFund\Service\Collect\Fee\Own;
+namespace Praxigento\PensionFund\Service\Collect\Fee\A;
 
 use Praxigento\Accounting\Api\Service\Operation\Request as AReqOper;
 use Praxigento\Accounting\Api\Service\Operation\Response as ARespOper;

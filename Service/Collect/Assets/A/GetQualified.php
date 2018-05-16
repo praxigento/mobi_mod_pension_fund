@@ -3,9 +3,10 @@
  * User: Alex Gusev <alex@flancer64.com>
  */
 
-namespace Praxigento\PensionFund\Service\Collect\Assets\Own;
+namespace Praxigento\PensionFund\Service\Collect\Assets\A;
 
 use Praxigento\BonusBase\Repo\Data\Rank as ERank;
+use Praxigento\Downline\Repo\Data\Customer as EDwnlCust;
 use Praxigento\PensionFund\Config as Cfg;
 
 /**
@@ -15,7 +16,7 @@ class GetQualified
 {
     /** @var int[] array of the qualified ranks IDs */
     private $cacheQualRanks;
-    /** @var \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers */
+    /** @var \Praxigento\PensionFund\Service\Collect\Z\GetEuCustomers */
     private $fnGetEuCust;
     /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
     private $daoBonDwnl;
@@ -28,7 +29,7 @@ class GetQualified
         \Praxigento\BonusBase\Repo\Dao\Rank $daoRank,
         \Praxigento\BonusHybrid\Repo\Dao\Downline $daoBonDwnl,
         \Praxigento\Downline\Repo\Dao\Customer $daoDwnlCust,
-        \Praxigento\PensionFund\Service\Collect\A\GetEuCustomers $fnGetEuCust
+        \Praxigento\PensionFund\Service\Collect\Z\GetEuCustomers $fnGetEuCust
     ) {
         $this->daoRank = $daoRank;
         $this->daoBonDwnl = $daoBonDwnl;
@@ -61,6 +62,17 @@ class GetQualified
         return $result;
     }
 
+    /**
+     * Get customer IDs for gold members (MOBI-1310).
+     *
+     * @return int[]
+     */
+    public function getGoldMembers()
+    {
+        $where = EDwnlCust::A_MLM_ID . '="777038763"';
+        $where .= ' OR ' . EDwnlCust::A_MLM_ID . '="777104780"';
+        $rs = $this->daoDwnlCust->get($where);
+    }
     /**
      * Collect IDs of the pension qualified ranks and save its to the cache.
      * @return int[]

@@ -4,7 +4,7 @@
  * Since: 2018
  */
 
-namespace Praxigento\PensionFund\Service\Collect\A;
+namespace Praxigento\PensionFund\Service\Collect\Z;
 
 use Praxigento\Downline\Repo\Data\Customer as EDwnlCust;
 use Praxigento\PensionFund\Config as Cfg;

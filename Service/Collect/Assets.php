@@ -7,7 +7,7 @@ namespace Praxigento\PensionFund\Service\Collect;
 
 use Praxigento\BonusBase\Repo\Data\Log\Opers as ELogOper;
 use Praxigento\PensionFund\Config as Cfg;
-use Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee as QBGetFee;
+use Praxigento\PensionFund\Service\Collect\Assets\A\Repo\Query\GetFee as QBGetFee;
 use Praxigento\PensionFund\Service\Collect\Assets\Request as ARequest;
 use Praxigento\PensionFund\Service\Collect\Assets\Response as AResponse;
 
@@ -17,13 +17,13 @@ use Praxigento\PensionFund\Service\Collect\Assets\Response as AResponse;
  */
 class Assets
 {
-    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified */
+    /** @var \Praxigento\PensionFund\Service\Collect\Assets\A\GetQualified */
     private $ownGetQual;
-    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessQualified */
+    /** @var \Praxigento\PensionFund\Service\Collect\Assets\A\ProcessQualified */
     private $ownProcQual;
-    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessUnqualified */
+    /** @var \Praxigento\PensionFund\Service\Collect\Assets\A\ProcessUnqualified */
     private $ownProcUnqual;
-    /** @var \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee */
+    /** @var \Praxigento\PensionFund\Service\Collect\Assets\A\Repo\Query\GetFee */
     private $qbGetFee;
     /** @var \Praxigento\BonusBase\Repo\Dao\Calculation */
     private $daoCalc;
@@ -39,10 +39,10 @@ class Assets
         \Praxigento\BonusBase\Repo\Dao\Calculation $daoCalc,
         \Praxigento\BonusBase\Repo\Dao\Log\Opers $daoLogOper,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
-        \Praxigento\PensionFund\Service\Collect\Assets\Own\Repo\Query\GetFee $qbGetFee,
-        \Praxigento\PensionFund\Service\Collect\Assets\Own\GetQualified $ownGetQual,
-        \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessQualified $ownProcQual,
-        \Praxigento\PensionFund\Service\Collect\Assets\Own\ProcessUnqualified $ownProcUnqual
+        \Praxigento\PensionFund\Service\Collect\Assets\A\Repo\Query\GetFee $qbGetFee,
+        \Praxigento\PensionFund\Service\Collect\Assets\A\GetQualified $ownGetQual,
+        \Praxigento\PensionFund\Service\Collect\Assets\A\ProcessQualified $ownProcQual,
+        \Praxigento\PensionFund\Service\Collect\Assets\A\ProcessUnqualified $ownProcUnqual
     ) {
         $this->daoReg = $daoReg;
         $this->daoCalc = $daoCalc;

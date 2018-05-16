@@ -16,14 +16,14 @@ class GetQualified
 {
     /** @var int[] array of the qualified ranks IDs */
     private $cacheQualRanks;
-    /** @var \Praxigento\PensionFund\Service\Collect\Z\GetEuCustomers */
-    private $fnGetEuCust;
     /** @var \Praxigento\BonusHybrid\Repo\Dao\Downline */
     private $daoBonDwnl;
     /** @var \Praxigento\Downline\Repo\Dao\Customer */
     private $daoDwnlCust;
     /** @var \Praxigento\BonusBase\Repo\Dao\Rank */
     private $daoRank;
+    /** @var \Praxigento\PensionFund\Service\Collect\Z\GetEuCustomers */
+    private $fnGetEuCust;
 
     public function __construct(
         \Praxigento\BonusBase\Repo\Dao\Rank $daoRank,
@@ -45,7 +45,7 @@ class GetQualified
      */
     public function exec($calcId)
     {
-        $result = [];
+        $reqular = [];
         $tree = $this->daoBonDwnl->getByCalcId($calcId);
         $euCusts = $this->fnGetEuCust->exec();
         foreach ($tree as $one) {
@@ -55,10 +55,12 @@ class GetQualified
                 $rankId = $one->getRankRef();
                 if ($this->isQualified($rankId)) {
                     $custId = $one->getCustomerRef();
-                    $result[] = $custId;
+                    $reqular[] = $custId;
                 }
             }
         }
+        $gold = $this->getGoldMembers();
+        $result = array_merge($reqular, $gold);
         return $result;
     }
 
@@ -67,11 +69,18 @@ class GetQualified
      *
      * @return int[]
      */
-    public function getGoldMembers()
+    private function getGoldMembers()
     {
+        $result = [];
         $where = EDwnlCust::A_MLM_ID . '="777038763"';
         $where .= ' OR ' . EDwnlCust::A_MLM_ID . '="777104780"';
         $rs = $this->daoDwnlCust->get($where);
+        /** @var EDwnlCust $one */
+        foreach ($rs as $one) {
+            $id = $one->getCustomerId();
+            $result[] = $id;
+        }
+        return $result;
     }
     /**
      * Collect IDs of the pension qualified ranks and save its to the cache.

@@ -203,14 +203,14 @@ class ProcessQualified
         $monthsLeft--;
         $monthsTotal++;
 
-        /* check pension returns ("+2" - see MOBI-1306) */
-        if ($monthsTotal == (36 + 2)) {
+        /* check pension returns ("+1/2" - see MOBI-1306, MOBI-1308) */
+        if ($monthsTotal == (36 + 1)) {
             $amntReturn = round($balanceClose * 0.3, 2);
             $balanceClose -= $amntReturn;
-        } elseif ($monthsTotal == (72 + 2)) {
+        } elseif ($monthsTotal == (72 + 1)) {
             $amntReturn = round($balanceClose * 0.5, 2);
             $balanceClose -= $amntReturn;
-        } elseif ($monthsTotal == (120 + 2)) {
+        } elseif ($monthsTotal == (120 + 1)) {
             $amntReturn = $balanceClose;
             $balanceClose = 0;
             /* reset customer state and start from the beginning */

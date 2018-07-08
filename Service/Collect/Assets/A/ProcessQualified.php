@@ -196,21 +196,22 @@ class ProcessQualified
             /* start next year */
             $monthsLeft = 12;
             $monthsInact = 0;
+        } else {
+            $monthsLeft--;
         }
         if ($isUnqual) {
             $monthsInact++;
         }
-        $monthsLeft--;
         $monthsTotal++;
 
-        /* check pension returns ("+1/2" - see MOBI-1306, MOBI-1308) */
-        if ($monthsTotal == (36 + 1)) {
+        /* check pension returns ("+1/2" - see MOBI-1306, MOBI-1308, MOBI-1492) */
+        if ($monthsTotal == (36)) {
             $amntReturn = round($balanceClose * 0.3, 2);
             $balanceClose -= $amntReturn;
-        } elseif ($monthsTotal == (72 + 1)) {
+        } elseif ($monthsTotal == (72)) {
             $amntReturn = round($balanceClose * 0.5, 2);
             $balanceClose -= $amntReturn;
-        } elseif ($monthsTotal == (120 + 1)) {
+        } elseif ($monthsTotal == (120)) {
             $amntReturn = $balanceClose;
             $balanceClose = 0;
             /* reset customer state and start from the beginning */

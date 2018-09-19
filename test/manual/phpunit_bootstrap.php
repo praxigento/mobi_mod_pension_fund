@@ -1,4 +1,10 @@
 <?php
+/**
+ * Include composer autoloader.
+ * Path is relative to "./work/vendor/<vendor>/<module>/test/manual/" folder.
+ */
+include_once(__DIR__ . '/../../../../autoload.php');
+/* Start M2 app */
 /* BP is defined in Magento's ./app/autoload.php */
 if (!defined('BP')) {
     include_once(__DIR__ . '/../../../../../app/bootstrap.php');

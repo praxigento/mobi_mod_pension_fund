@@ -5,8 +5,8 @@
 
 namespace Praxigento\PensionFund\Service\Collect\Fee\A;
 
-use Praxigento\Accounting\Api\Service\Operation\Request as AReqOper;
-use Praxigento\Accounting\Api\Service\Operation\Response as ARespOper;
+use Praxigento\Accounting\Api\Service\Operation\Create\Request as AReqOper;
+use Praxigento\Accounting\Api\Service\Operation\Create\Response as ARespOper;
 use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
 use Praxigento\PensionFund\Config as Cfg;
 
@@ -21,14 +21,14 @@ class CreateOperation
     private $daoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
     private $daoAssetType;
-    /** @var \Praxigento\Accounting\Api\Service\Operation */
+    /** @var \Praxigento\Accounting\Api\Service\Operation\Create */
     private $servOper;
 
     public function __construct(
         \Praxigento\Accounting\Repo\Dao\Account $daoAcc,
         \Praxigento\Accounting\Repo\Dao\Type\Asset $daoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
-        \Praxigento\Accounting\Api\Service\Operation $servOper
+        \Praxigento\Accounting\Api\Service\Operation\Create $servOper
     ) {
         $this->daoAcc = $daoAcc;
         $this->daoAssetType = $daoAssetType;

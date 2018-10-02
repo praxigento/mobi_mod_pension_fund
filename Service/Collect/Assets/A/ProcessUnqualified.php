@@ -5,8 +5,8 @@
 
 namespace Praxigento\PensionFund\Service\Collect\Assets\A;
 
-use Praxigento\Accounting\Api\Service\Operation\Request as AReqOper;
-use Praxigento\Accounting\Api\Service\Operation\Response as ARespOper;
+use Praxigento\Accounting\Api\Service\Operation\Create\Request as AReqOper;
+use Praxigento\Accounting\Api\Service\Operation\Create\Response as ARespOper;
 use Praxigento\Accounting\Repo\Data\Transaction as ETrans;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Repo\Data\Registry as EPensReg;
@@ -24,7 +24,7 @@ class ProcessUnqualified
     private $daoAssetType;
     /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
     private $daoReg;
-    /** @var \Praxigento\Accounting\Api\Service\Operation */
+    /** @var \Praxigento\Accounting\Api\Service\Operation\Create */
     private $servOper;
 
     public function __construct(
@@ -32,7 +32,7 @@ class ProcessUnqualified
         \Praxigento\PensionFund\Repo\Dao\Registry $daoReg,
         \Praxigento\Accounting\Repo\Dao\Type\Asset $daoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
-        \Praxigento\Accounting\Api\Service\Operation $servOper
+        \Praxigento\Accounting\Api\Service\Operation\Create $servOper
     ) {
         $this->daoAcc = $daoAcc;
         $this->daoReg = $daoReg;

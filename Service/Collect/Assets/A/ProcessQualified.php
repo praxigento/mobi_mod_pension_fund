@@ -128,7 +128,8 @@ class ProcessQualified
                 $tranReturn->setCreditAccId($accPensionIdSys);
                 $tranReturn->setValue($amntReturn);
                 $tranReturn->setDateApplied($dateApplied);
-                $months = $update->getMonthsTotal() - 2; // see MOBI-1306
+                $months = $update->getMonthsTotal(); // see MOBI-1306, SAN-381
+                if ($months <= 0) $months = 120; // 10 years
                 $note = "Pension return on $months months.";
                 $tranReturn->setNote($note);
                 $transReturn[] = $tranReturn;

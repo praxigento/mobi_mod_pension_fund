@@ -128,9 +128,10 @@ class ProcessQualified
                 $tranReturn->setCreditAccId($accPensionIdSys);
                 $tranReturn->setValue($amntReturn);
                 $tranReturn->setDateApplied($dateApplied);
-                $months = $update->getMonthsTotal(); // see MOBI-1306, SAN-381
-                if ($months <= 0) $months = 120; // 10 years
-                $note = "Pension return on $months months.";
+                $months = $update->getMonthsTotal(); // see MOBI-1306, SAN-381, SAN-435
+                $div = $months % 120; // 10 years
+                if ($div == 0) $div = 120;
+                $note = "Pension return on $div months.";
                 $tranReturn->setNote($note);
                 $transReturn[] = $tranReturn;
                 /* incoming transaction to wallet account */
@@ -205,19 +206,17 @@ class ProcessQualified
         }
         $monthsTotal++;
 
-        /* check pension returns ("+1/2" - see MOBI-1306, MOBI-1308, MOBI-1492) */
-        if ($monthsTotal == (36)) {
+        /* check pension returns ("+-0/1/2" - see MOBI-1306, MOBI-1308, MOBI-1492, SAN-435) */
+        $div = $monthsTotal % 120;
+        if ($div == 36) {
             $amntReturn = round($balanceClose * 0.3, 2);
             $balanceClose -= $amntReturn;
-        } elseif ($monthsTotal == (72)) {
+        } elseif ($div == 72) {
             $amntReturn = round($balanceClose * 0.5, 2);
             $balanceClose -= $amntReturn;
-        } elseif ($monthsTotal == (120)) {
+        } elseif (($div == 0) && ($monthsTotal > 0)) {
             $amntReturn = $balanceClose;
             $balanceClose = 0;
-            /* reset customer state and start from the beginning */
-            $monthsLeft = 10;
-            $monthsTotal = 2;
         } else {
             $amntReturn = 0;
         }

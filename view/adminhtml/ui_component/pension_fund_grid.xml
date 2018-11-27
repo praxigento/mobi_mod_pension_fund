@@ -103,7 +103,8 @@
             </settings>
         </column>
 
-        <column name="balanceOpen">
+        <column name="balanceOpen"
+                component="Praxigento_Core/js/grid/columns/number">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -111,7 +112,8 @@
             </settings>
         </column>
 
-        <column name="amountIn">
+        <column name="amountIn"
+                component="Praxigento_Core/js/grid/columns/number">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -119,7 +121,8 @@
             </settings>
         </column>
 
-        <column name="amountPercent">
+        <column name="amountPercent"
+                component="Praxigento_Core/js/grid/columns/number">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -127,7 +130,8 @@
             </settings>
         </column>
 
-        <column name="amountReturned">
+        <column name="amountReturned"
+                component="Praxigento_Core/js/grid/columns/number">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -135,7 +139,8 @@
             </settings>
         </column>
 
-        <column name="balanceClose">
+        <column name="balanceClose"
+                component="Praxigento_Core/js/grid/columns/number">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>

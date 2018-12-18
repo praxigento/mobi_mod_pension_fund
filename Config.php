@@ -15,7 +15,7 @@ use Praxigento\Wallet\Config as WalletCfg;
 class Config
     extends \Praxigento\BonusHybrid\Config
 {
-    const ACL_PENSION_FUND = 'admin_accounting_pension_fund';
+    const ACL_PENSION_FUND = 'admin_accounts_pension_fund';
 
     const CODE_TYPE_ASSET_PENSION = 'PENSION';
     const CODE_TYPE_ASSET_WALLET = WalletCfg::CODE_TYPE_ASSET_WALLET;

@@ -47,7 +47,7 @@
     <columns name="pension_fund_columns">
 
         <column name="mlmId"
-                component="Praxigento_PensionFund/js/grid/pension/columns/link/mlm_id">
+                component="Praxigento_PensionFund/js/grid/pension/column/link/mlm_id">
             <settings>
                 <dataType>number</dataType>
                 <filter>text</filter>
@@ -57,7 +57,7 @@
         </column>
 
         <column name="name"
-                component="Praxigento_PensionFund/js/grid/pension/columns/link/name">
+                component="Praxigento_PensionFund/js/grid/pension/column/link/name">
             <settings>
                 <dataType>text</dataType>
                 <filter>text</filter>

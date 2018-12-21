@@ -1,5 +1,5 @@
 define([
-    "Praxigento_Core/js/grid/columns/link"
+    "Praxigento_Core/js/grid/column/link"
 ], function (Column) {
     "use strict";
 

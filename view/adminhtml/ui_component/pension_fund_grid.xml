@@ -82,7 +82,7 @@
         </column>
 
         <column name="monthsTotal"
-                component="Praxigento_Core/js/grid/columns/integer">
+                component="Praxigento_Core/js/grid/column/integer">
             <settings>
                 <dataType>number</dataType>
                 <filter>text</filter>
@@ -91,7 +91,7 @@
         </column>
 
         <column name="monthsInact"
-                component="Praxigento_Core/js/grid/columns/integer">
+                component="Praxigento_Core/js/grid/column/integer">
             <settings>
                 <dataType>number</dataType>
                 <filter>text</filter>
@@ -100,7 +100,7 @@
         </column>
 
         <column name="monthsLeft"
-                component="Praxigento_Core/js/grid/columns/integer">
+                component="Praxigento_Core/js/grid/column/integer">
             <settings>
                 <dataType>number</dataType>
                 <filter>text</filter>
@@ -109,7 +109,7 @@
         </column>
 
         <column name="balanceOpen"
-                component="Praxigento_Core/js/grid/columns/decimal">
+                component="Praxigento_Core/js/grid/column/decimal">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -118,7 +118,7 @@
         </column>
 
         <column name="amountIn"
-                component="Praxigento_Core/js/grid/columns/decimal">
+                component="Praxigento_Core/js/grid/column/decimal">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -127,7 +127,7 @@
         </column>
 
         <column name="amountPercent"
-                component="Praxigento_Core/js/grid/columns/decimal">
+                component="Praxigento_Core/js/grid/column/decimal">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -136,7 +136,7 @@
         </column>
 
         <column name="amountReturned"
-                component="Praxigento_Core/js/grid/columns/decimal">
+                component="Praxigento_Core/js/grid/column/decimal">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>
@@ -145,7 +145,7 @@
         </column>
 
         <column name="balanceClose"
-                component="Praxigento_Core/js/grid/columns/decimal">
+                component="Praxigento_Core/js/grid/column/decimal">
             <settings>
                 <dataType>price</dataType>
                 <filter>textRange</filter>

@@ -77,7 +77,7 @@ class GetQualified
         $rs = $this->daoDwnlCust->get($where);
         /** @var EDwnlCust $one */
         foreach ($rs as $one) {
-            $id = $one->getCustomerId();
+            $id = $one->getCustomerRef();
             $result[] = $id;
         }
         return $result;

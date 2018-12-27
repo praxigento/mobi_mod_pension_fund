@@ -102,7 +102,7 @@ class QueryBuilder
         $cols = [
             self::A_MLM_ID => ECustomer::A_MLM_ID
         ];
-        $cond = $as . '.' . ECustomer::A_CUSTOMER_ID . '=' . $asPensReg . '.' . ERegistry::A_CUSTOMER_REF;
+        $cond = $as . '.' . ECustomer::A_CUSTOMER_REF . '=' . $asPensReg . '.' . ERegistry::A_CUSTOMER_REF;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         /* LEFT JOIN customer_entity*/
@@ -113,7 +113,7 @@ class QueryBuilder
             self::A_CUST_ID => Cfg::E_CUSTOMER_A_ENTITY_ID,
             self::A_NAME => $exp,
         ];
-        $cond = $as . '.' . Cfg::E_CUSTOMER_A_ENTITY_ID . '=' . $asDwnlCust . '.' . ECustomer::A_CUSTOMER_ID;
+        $cond = $as . '.' . Cfg::E_CUSTOMER_A_ENTITY_ID . '=' . $asDwnlCust . '.' . ECustomer::A_CUSTOMER_REF;
         $result->joinLeft([$as => $tbl], $cond, $cols);
 
         return $result;

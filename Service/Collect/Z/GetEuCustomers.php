@@ -36,7 +36,7 @@ class GetEuCustomers
         $all = $this->daoDwnlCust->get();
         /** @var EDwnlCust $one */
         foreach ($all as $one) {
-            $custId = $one->getCustomerId();
+            $custId = $one->getCustomerRef();
             $scheme = $this->hlpScheme->getSchemeByCustomer($one);
             if (Cfg::SCHEMA_EU == $scheme) {
                 $result[] = $custId;

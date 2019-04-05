@@ -11,14 +11,16 @@ namespace Praxigento\PensionFund\Cli\Collect;
 class ProcessingFee
     extends \Praxigento\Core\App\Cli\Cmd\Base
 {
-    /** @var \Praxigento\Core\Api\App\Repo\Transaction\Manager */
-    private $manTrans;
+    /** @var \Magento\Framework\DB\Adapter\AdapterInterface */
+    private $conn;
+    /** @var \Magento\Framework\App\ResourceConnection */
+    private $resource;
     /** @var \Praxigento\PensionFund\Service\Collect\Fee */
     private $servCollectFee;
 
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $manObj,
-        \Praxigento\Core\Api\App\Repo\Transaction\Manager $manTrans,
+        \Magento\Framework\App\ResourceConnection $resource,
         \Praxigento\PensionFund\Service\Collect\Fee $servCollectFee
     ) {
         parent::__construct(
@@ -26,7 +28,8 @@ class ProcessingFee
             'prxgt:pension:collect:fee',
             'Collect processing fee for the last calculated period.'
         );
-        $this->manTrans = $manTrans;
+        $this->resource = $resource;
+        $this->conn = $resource->getConnection();
         $this->servCollectFee = $servCollectFee;
     }
 
@@ -36,14 +39,20 @@ class ProcessingFee
     ) {
         $output->writeln("<info>Start processing fee collection.<info>");
         /* wrap all DB operations with DB transaction */
-        $def = $this->manTrans->begin();
+        $this->conn->beginTransaction();
+        try {
 
         $req = new \Praxigento\PensionFund\Service\Collect\Fee\Request();
         $resp = $this->servCollectFee->exec($req);
         $operId = $resp->getOperationId();
         $output->writeln("<info>Processing fee operation #$operId is created.<info>");
 
-        $this->manTrans->commit($def);
+            $this->conn->commit();
+        } catch (\Throwable $e) {
+            $output->writeln('<info>Command \'' . $this->getName() . '\' failed. Reason: '
+                . $e->getMessage() . '.<info>');
+            $this->conn->rollBack();
+        }
         $output->writeln('<info>Command is completed.<info>');
     }
 }

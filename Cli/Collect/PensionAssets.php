@@ -37,7 +37,7 @@ class PensionAssets
         \Symfony\Component\Console\Input\InputInterface $input,
         \Symfony\Component\Console\Output\OutputInterface $output
     ) {
-        $output->writeln("<info>Start pension assets collection.<info>");
+        $output->writeln("<info>Command '" . $this->getName() . "' is started.<info>");
         /* wrap all DB operations with DB transaction */
         $this->conn->beginTransaction();
         try {
@@ -58,6 +58,6 @@ class PensionAssets
                 . $e->getMessage() . '.<info>');
             $this->conn->rollBack();
         }
-        $output->writeln('<info>Command is completed.<info>');
+        $output->writeln('<info>Command \'' . $this->getName() . '\' is completed.<info>');
     }
 }

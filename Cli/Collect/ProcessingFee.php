@@ -53,6 +53,6 @@ class ProcessingFee
                 . $e->getMessage() . '.<info>');
             $this->conn->rollBack();
         }
-        $output->writeln('<info>Command is completed.<info>');
+        $output->writeln('<info>Command \'' . $this->getName() . '\' is completed.<info>');
     }
 }

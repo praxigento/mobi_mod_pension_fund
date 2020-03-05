@@ -53,13 +53,16 @@ class Calc
         $feeDef = [];
         $feeEu = [];
         foreach ($totals as $custId => $amount) {
+            $fee = 0;
             if ($amount > self::MAX_LEVEL) {
-                /* calc fee for amounts > 100 */
-                $rankId = $ranks[$custId];
-                $rankCode = $this->getCodeById($rankId);
-                $fee = $this->mapRankFee[$rankCode];
+                /* calc fee for amounts > 100 & for qualified customers */
+                if (isset($ranks[$custId])) {
+                    $rankId = $ranks[$custId];
+                    $rankCode = $this->getCodeById($rankId);
+                    $fee = $this->mapRankFee[$rankCode];
+                } // else - customer is unqualified
             } else {
-                /* calc fee for amounts <= 100 */
+                /* calc fee for amounts <= 100 or for unqualified customers */
                 foreach ($this->mapFees as $level => $fee) {
                     if ($amount <= $level) break;
                 }

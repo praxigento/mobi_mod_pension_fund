@@ -74,6 +74,7 @@ class GetQualified
         $result = [];
         $where = EDwnlCust::A_MLM_ID . '="777038763"';
         $where .= ' OR ' . EDwnlCust::A_MLM_ID . '="777104780"';
+        $where .= ' OR ' . EDwnlCust::A_MLM_ID . '="100002146"';
         $rs = $this->daoDwnlCust->get($where);
         /** @var EDwnlCust $one */
         foreach ($rs as $one) {

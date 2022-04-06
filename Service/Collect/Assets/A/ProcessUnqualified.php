@@ -90,6 +90,7 @@ class ProcessUnqualified
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $note = "Pension fund cleanup on inactivity (period #$period).";
         $pensioners = array_merge($qual, $unqual);
+        $balances = $this->getBalancesPension();
 
         /** perform processing */
         $trans = [];
@@ -97,7 +98,7 @@ class ProcessUnqualified
         foreach ($registry as $item) {
             $custId = $item->getCustomerRef();
             if (!in_array($custId, $pensioners)) {
-                list($updated, $amountClean) = $this->processRegistryItem($item, $period);
+                list($updated, $amountClean) = $this->processRegistryItem($item, $period, $balances);
                 $this->daoReg->updateById($custId, $updated);
                 if ($amountClean > Cfg::DEF_ZERO) {
                     $trans[] = $this->createTransaction(
@@ -123,13 +124,29 @@ class ProcessUnqualified
     }
 
     /**
+     * Get "customer ID to pension balance" map.
+     * @return array [$custId=>$balance]
+     */
+    private function getBalancesPension() {
+        $result = [];
+        $byAccId = $this->daoAcc->getAllByAssetTypeCode(Cfg::CODE_TYPE_ASSET_PENSION);
+        foreach ($byAccId as $one) {
+            $custId = $one->getCustomerId();
+            $balance = $one->getBalance();
+            $result[$custId] = $balance;
+        }
+        return $result;
+    }
+
+    /**
      * @param EPensReg $item
      * @param string $period (YYYYMM)
+     * @param array $balances "customer ID to pension balance" map ([$custId=>$balance]).
      * @return array [EPensReg, float]
      */
-    private function processRegistryItem($item, $period)
-    {
-        $balance = $item->getBalanceClose();
+    private function processRegistryItem($item, $period, $balances) {
+        $custId = $item->getCustomerRef();
+        $balance = $balances[$custId] ?? 0;
         $monthsInact = $item->getMonthsInact();
         $monthsLeft = $item->getMonthsLeft();
         $monthsTotal = $item->getMonthsTotal();
@@ -150,8 +167,8 @@ class ProcessUnqualified
 //            }
 //            $amountClean = $balance;
 //        }
-        $item->setBalanceOpen(0);
-        $item->setBalanceClose(0);
+        $item->setBalanceOpen($balance);
+        $item->setBalanceClose($balance - $amountClean);
         $item->setAmountIn(0);
         $item->setAmountPercent(0);
         $item->setMonthsInact($monthsInact);

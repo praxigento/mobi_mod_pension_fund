@@ -65,6 +65,21 @@ class ProcessQualified
     }
 
     /**
+     * Get "customer ID to pension balance" map.
+     * @return array [$custId=>$balance]
+     */
+    private function getBalancesPension() {
+        $result = [];
+        $byAccId = $this->daoAcc->getAllByAssetTypeCode(Cfg::CODE_TYPE_ASSET_PENSION);
+        foreach ($byAccId as $one) {
+            $custId = $one->getCustomerId();
+            $balance = $one->getBalance();
+            $result[$custId] = $balance;
+        }
+        return $result;
+    }
+
+    /**
      * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry
      * @param int[] $qual array with IDs of the qualified customers
      * @param int[] $unqual array with IDs of the first time unqualified customers
@@ -80,6 +95,7 @@ class ProcessQualified
         $accPensionIdSys = $this->daoAcc->getSystemAccountId($assetPensionTypeId);
         $assetWalletTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_WALLET);
         $accWalletIdSys = $this->daoAcc->getSystemAccountId($assetWalletTypeId);
+        $balances = $this->getBalancesPension();
         $ds = $this->hlpPeriod->getPeriodLastDate($period);
         $dateApplied = $this->hlpPeriod->getTimestampUpTo($ds);
         $notePens = "Pension income for period #$period.";
@@ -96,7 +112,7 @@ class ProcessQualified
         $transReturn = [];
         foreach ($pensioners as $custId) {
             $isUnqual = in_array($custId, $unqual);
-            $update = $this->prepareRegUpdate($custId, $income, $registry, $isUnqual, $period);
+            $update = $this->prepareRegUpdate($custId, $income, $registry, $isUnqual, $period, $balances);
             $updates[] = $update;
             $accCust = $this->daoAcc->getByCustomerId($custId, $assetPensionTypeId);
             $accIdCust = $accCust->getId();
@@ -165,11 +181,11 @@ class ProcessQualified
      * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry
      * @param bool $isUnqual
      * @param string $period YYYYMM
+     * @param array $balances "customer ID to pension balance" map.
      * @return \Praxigento\PensionFund\Repo\Data\Registry
      * @throws \Exception
      */
-    private function prepareRegUpdate($custId, $amntIn, $registry, $isUnqual, $period)
-    {
+    private function prepareRegUpdate($custId, $amntIn, $registry, $isUnqual, $period, $balances) {
         if (isset($registry[$custId])) {
             $result = $registry[$custId];
             if (!$isUnqual) {
@@ -186,7 +202,7 @@ class ProcessQualified
             $result = $this->resetRegistryEntry($result, $period);
         }
         /* open balance equals to the close balance for the previous period */
-        $balanceOpen = (float)$result->getBalanceClose();
+        $balanceOpen = (float)($balances[$custId] ?? 0);
         /* 3% per year = 0.03 / 12 per month */
         $amntPercent = floor($balanceOpen * Cfg::DEF_PENSION_INTEREST_PERCENT / 12 * 100) / 100;
         $balanceClose = $balanceOpen + $amntIn + $amntPercent;

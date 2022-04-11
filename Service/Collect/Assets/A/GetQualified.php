@@ -61,6 +61,7 @@ class GetQualified
         }
         $gold = $this->getGoldMembers();
         $result = array_merge($reqular, $gold);
+        $result = array_unique($result);
         return $result;
     }
 

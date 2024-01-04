@@ -152,21 +152,20 @@ class ProcessUnqualified
         $monthsTotal = $item->getMonthsTotal();
         $periodTerm = $item->getPeriodTerm();
         $amountClean = 0; // amount to return to the store.
-        // TODO: remove it after bonus 2022/03
-//        if ($monthsInact >= 1) {
-//            /* this customer already was an inactive in the current period */
-//            if ($monthsLeft <= 1) {
-//                /* start next year (inactivity is in the previous period) */
-//                $monthsLeft = 12;
-//            }
-//            $monthsInact++;
-//            $monthsLeft--;
-//            $monthsTotal++;
-//            if (is_null($periodTerm)) {
-//                $periodTerm = $period;
-//            }
-//            $amountClean = $balance;
-//        }
+        if ($monthsInact >= 1) {
+            /* this customer already was an inactive in the current period */
+            if ($monthsLeft <= 1) {
+                /* start next year (inactivity is in the previous period) */
+                $monthsLeft = 12;
+            }
+            $monthsInact++;
+            $monthsLeft--;
+            $monthsTotal++;
+            if (is_null($periodTerm)) {
+                $periodTerm = $period;
+            }
+            $amountClean = $balance;
+        }
         $item->setBalanceOpen($balance);
         $item->setBalanceClose($balance - $amountClean);
         $item->setAmountIn(0);

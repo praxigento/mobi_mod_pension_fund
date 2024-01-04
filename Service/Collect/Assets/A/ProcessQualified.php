@@ -218,8 +218,7 @@ class ProcessQualified
             $monthsLeft--;
         }
         if ($isUnqual) {
-            // TODO: remove it after bonus 2022/03
-//            $monthsInact++;
+            $monthsInact++;
         }
         $monthsTotal++;
 

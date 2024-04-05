@@ -14,8 +14,7 @@ use Praxigento\PensionFund\Repo\Data\Registry as EPensReg;
 /**
  * Update registry data and create operations for pension incomes & percents for the period.
  */
-class ProcessQualified
-{
+class ProcessQualified {
     /** @var \Praxigento\Accounting\Repo\Dao\Account */
     private $daoAcc;
     /** @var \Praxigento\Accounting\Repo\Dao\Type\Asset */
@@ -33,7 +32,8 @@ class ProcessQualified
         \Praxigento\Accounting\Repo\Dao\Type\Asset $daoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation\Create $servOper
-    ) {
+    )
+    {
         $this->daoAcc = $daoAcc;
         $this->daoReg = $daoReg;
         $this->daoAssetType = $daoAssetType;
@@ -68,7 +68,8 @@ class ProcessQualified
      * Get "customer ID to pension balance" map.
      * @return array [$custId=>$balance]
      */
-    private function getBalancesPension() {
+    private function getBalancesPension()
+    {
         $result = [];
         $byAccId = $this->daoAcc->getAllByAssetTypeCode(Cfg::CODE_TYPE_ASSET_PENSION);
         foreach ($byAccId as $one) {
@@ -85,10 +86,11 @@ class ProcessQualified
      * @param int[] $unqual array with IDs of the first time unqualified customers
      * @param float $fee total amount of the processing fee for period
      * @param string $period 'YYYYMM'
+     * @param int[] $warCusts
      * @return int[] IDs of the created operations ([$operIdPens, $operIdPercent, $operIdReturn])
      * @throws \Exception
      */
-    public function exec($registry, $qual, $unqual, $fee, $period)
+    public function exec($registry, $qual, $unqual, $fee, $period, $warCusts)
     {
         /** define local working data */
         $assetPensionTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
@@ -111,19 +113,22 @@ class ProcessQualified
         $transPercent = [];
         $transReturn = [];
         foreach ($pensioners as $custId) {
+            $isWar = in_array($custId, $warCusts);
             $isUnqual = in_array($custId, $unqual);
-            $update = $this->prepareRegUpdate($custId, $income, $registry, $isUnqual, $period, $balances);
+            $update = $this->prepareRegUpdate($custId, $income, $registry, $isUnqual, $period, $balances, $isWar);
             $updates[] = $update;
             $accCust = $this->daoAcc->getByCustomerId($custId, $assetPensionTypeId);
             $accIdCust = $accCust->getId();
             /* create income transaction */
-            $tranPens = new ETrans();
-            $tranPens->setDebitAccId($accPensionIdSys);
-            $tranPens->setCreditAccId($accIdCust);
-            $tranPens->setValue($update->getAmountIn());
-            $tranPens->setDateApplied($dateApplied);
-            $tranPens->setNote($notePens);
-            $transPens[] = $tranPens;
+            if ($update->getAmountIn() > 0) {
+                $tranPens = new ETrans();
+                $tranPens->setDebitAccId($accPensionIdSys);
+                $tranPens->setCreditAccId($accIdCust);
+                $tranPens->setValue($update->getAmountIn());
+                $tranPens->setDateApplied($dateApplied);
+                $tranPens->setNote($notePens);
+                $transPens[] = $tranPens;
+            }
             /* create percent transaction */
             $amntPercent = $update->getAmountPercent();
             if ($amntPercent > Cfg::DEF_ZERO) {
@@ -182,10 +187,12 @@ class ProcessQualified
      * @param bool $isUnqual
      * @param string $period YYYYMM
      * @param array $balances "customer ID to pension balance" map.
+     * @param bool $isWar
      * @return \Praxigento\PensionFund\Repo\Data\Registry
      * @throws \Exception
      */
-    private function prepareRegUpdate($custId, $amntIn, $registry, $isUnqual, $period, $balances) {
+    private function prepareRegUpdate($custId, $amntIn, $registry, $isUnqual, $period, $balances, $isWar)
+    {
         if (isset($registry[$custId])) {
             $result = $registry[$custId];
             if (!$isUnqual) {
@@ -205,7 +212,8 @@ class ProcessQualified
         $balanceOpen = (float)($balances[$custId] ?? 0);
         /* 3% per year = 0.03 / 12 per month */
         $amntPercent = floor($balanceOpen * Cfg::DEF_PENSION_INTEREST_PERCENT / 12 * 100) / 100;
-        $balanceClose = $balanceOpen + $amntIn + $amntPercent;
+        $amntInWar = ($isUnqual && $isWar) ? 0 : $amntIn;
+        $balanceClose = $balanceOpen + $amntInWar + $amntPercent;
         $monthsInact = $result->getMonthsInact();
         $monthsLeft = $result->getMonthsLeft();
         $monthsTotal = $result->getMonthsTotal();
@@ -217,7 +225,7 @@ class ProcessQualified
         } else {
             $monthsLeft--;
         }
-        if ($isUnqual) {
+        if ($isUnqual && !$isWar) {
             $monthsInact++;
         }
         $monthsTotal++;
@@ -239,7 +247,7 @@ class ProcessQualified
 
         /** compose result */
         $result->setBalanceOpen($balanceOpen);
-        $result->setAmountIn($amntIn);
+        $result->setAmountIn($amntInWar);
         $result->setAmountPercent($amntPercent);
         $result->setAmountReturned($amntReturn);
         $result->setBalanceClose($balanceClose);
@@ -268,6 +276,7 @@ class ProcessQualified
         $entry->setPeriodTerm(null);
         return $entry;
     }
+
     /**
      * @param \Praxigento\PensionFund\Repo\Data\Registry[] $updates
      * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry

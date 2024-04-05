@@ -6,6 +6,7 @@
 namespace Praxigento\PensionFund\Service\Collect;
 
 use Praxigento\BonusBase\Repo\Data\Log\Opers as ELogOper;
+use Praxigento\Downline\Repo\Data\Customer as EDwnlCust;
 use Praxigento\PensionFund\Config as Cfg;
 use Praxigento\PensionFund\Service\Collect\Assets\A\Repo\Query\GetFee as QBGetFee;
 use Praxigento\PensionFund\Service\Collect\Assets\Request as ARequest;
@@ -15,8 +16,7 @@ use Praxigento\PensionFund\Service\Collect\Assets\Response as AResponse;
  * Module level service to collect pension related data and add assets to pension accounts for
  * the last calculated period.
  */
-class Assets
-{
+class Assets {
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\A\GetQualified */
     private $ownGetQual;
     /** @var \Praxigento\PensionFund\Service\Collect\Assets\A\ProcessQualified */
@@ -31,6 +31,8 @@ class Assets
     private $daoLogOper;
     /** @var \Praxigento\PensionFund\Repo\Dao\Registry */
     private $daoReg;
+    /** @var \Praxigento\Downline\Repo\Dao\Customer */
+    private $daoDwnlCust;
     /** @var \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent */
     private $servCalcDep;
 
@@ -38,15 +40,18 @@ class Assets
         \Praxigento\PensionFund\Repo\Dao\Registry $daoReg,
         \Praxigento\BonusBase\Repo\Dao\Calculation $daoCalc,
         \Praxigento\BonusBase\Repo\Dao\Log\Opers $daoLogOper,
+        \Praxigento\Downline\Repo\Dao\Customer $daoDwnlCust,
         \Praxigento\BonusBase\Api\Service\Period\Calc\Get\Dependent $servCalcDep,
         \Praxigento\PensionFund\Service\Collect\Assets\A\Repo\Query\GetFee $qbGetFee,
         \Praxigento\PensionFund\Service\Collect\Assets\A\GetQualified $ownGetQual,
         \Praxigento\PensionFund\Service\Collect\Assets\A\ProcessQualified $ownProcQual,
         \Praxigento\PensionFund\Service\Collect\Assets\A\ProcessUnqualified $ownProcUnqual
-    ) {
+    )
+    {
         $this->daoReg = $daoReg;
         $this->daoCalc = $daoCalc;
         $this->daoLogOper = $daoLogOper;
+        $this->daoDwnlCust = $daoDwnlCust;
         $this->servCalcDep = $servCalcDep;
         $this->qbGetFee = $qbGetFee;
         $this->ownGetQual = $ownGetQual;
@@ -71,7 +76,7 @@ class Assets
          * @var \Praxigento\BonusBase\Repo\Data\Calculation $cmprsCalc
          * @var \Praxigento\BonusBase\Repo\Data\Calculation $feeCalc
          */
-        list($pensPeriod, $pensCalc, $cmprsCalc, $feeCalc) = $this->getCalcData();
+        [$pensPeriod, $pensCalc, $cmprsCalc, $feeCalc] = $this->getCalcData();
         $dsEnd = $pensPeriod->getDstampEnd();
         $cmprsCalcId = $cmprsCalc->getId();
         $feeCalcId = $feeCalc->getId();
@@ -81,9 +86,10 @@ class Assets
         /* get all qualified customers */
         $qual = $this->ownGetQual->exec($cmprsCalcId);
         $registry = $this->getPensionRegistry();
-        $unqual = $this->collectUnqualPensioners($registry, $qual);
-        list($operIdIncome, $operIdPercent, $operIdReturn) = $this->ownProcQual->exec($registry, $qual, $unqual, $fee, $period);
-        list($operIdCleanup) = $this->ownProcUnqual->exec($registry, $qual, $unqual, $period);
+        $warCusts = $this->getWarCustomers();
+        $unqual = $this->collectUnqualPensioners($registry, $qual, $warCusts);
+        [$operIdIncome, $operIdPercent, $operIdReturn] = $this->ownProcQual->exec($registry, $qual, $unqual, $fee, $period, $warCusts);
+        [$operIdCleanup] = $this->ownProcUnqual->exec($registry, $qual, $unqual, $period, $warCusts);
         /* register operation in log then mark calculation as complete */
         if ($operIdIncome) $this->saveLogOper($operIdIncome, $pensCalcId);
         if ($operIdPercent) $this->saveLogOper($operIdPercent, $pensCalcId);
@@ -96,6 +102,23 @@ class Assets
         $result->setOperIdPercent($operIdPercent);
         $result->setOperIdReturn($operIdReturn);
         $result->setOperIdCleanup($operIdCleanup);
+        return $result;
+    }
+
+    /**
+     * Select IDs of the customers from RU & UA.
+     * @return array
+     */
+    private function getWarCustomers()
+    {
+        $result = [];
+        $whereUa = EDwnlCust::A_COUNTRY_CODE . '="UA"';
+        $where = "($whereUa)";
+        $all = $this->daoDwnlCust->get($where);
+        /** @var EDwnlCust $one */
+        foreach ($all as $one) {
+            $result[] = $one->getCustomerRef();
+        }
         return $result;
     }
 
@@ -169,9 +192,10 @@ class Assets
      *
      * @param \Praxigento\PensionFund\Repo\Data\Registry[] $registry on state for the end of previous period
      * @param int[] $qualified
+     * @param int[] $warCusts
      * @return int[]
      */
-    private function collectUnqualPensioners($registry, $qualified)
+    private function collectUnqualPensioners($registry, $qualified, $warCusts)
     {
         $result = [];
         foreach ($registry as $one) {
@@ -179,8 +203,8 @@ class Assets
             $isQual = in_array($custId, $qualified);
             if (!$isQual) {
                 $monthsInact = $one->getMonthsInact();
-                if ($monthsInact <= 0) {
-                    /* this customer is unqualified first time in the year */
+                if (($monthsInact <= 0)|| in_array($custId, $warCusts)) {
+                    /* this customer is unqualified first time in the year or it is the UA customer */
                     $result[] = $custId;
                 }
             }

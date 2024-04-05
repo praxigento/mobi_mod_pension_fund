@@ -14,8 +14,7 @@ use Praxigento\PensionFund\Repo\Data\Registry as EPensReg;
 /**
  * Update registry data and create operations for unqualified customers funds return.
  */
-class ProcessUnqualified
-{
+class ProcessUnqualified {
     /** @var \Praxigento\Core\Api\Helper\Period */
     private $hlpPeriod;
     /** @var \Praxigento\Accounting\Repo\Dao\Account */
@@ -33,7 +32,8 @@ class ProcessUnqualified
         \Praxigento\Accounting\Repo\Dao\Type\Asset $daoAssetType,
         \Praxigento\Core\Api\Helper\Period $hlpPeriod,
         \Praxigento\Accounting\Api\Service\Operation\Create $servOper
-    ) {
+    )
+    {
         $this->daoAcc = $daoAcc;
         $this->daoReg = $daoReg;
         $this->daoAssetType = $daoAssetType;
@@ -78,10 +78,11 @@ class ProcessUnqualified
      * @param int[] $qual array with IDs of the qualified customers
      * @param int[] $unqual array with IDs of the unqualified pensioners (first timers)
      * @param string $period 'YYYYMM'
+     * @param int[] $warCusts
      * @return int id of the created operation
      * @throws \Exception
      */
-    public function exec($registry, $qual, $unqual, $period)
+    public function exec($registry, $qual, $unqual, $period, $warCusts)
     {
         /** define local working data */
         $assetTypeId = $this->daoAssetType->getIdByCode(Cfg::CODE_TYPE_ASSET_PENSION);
@@ -97,8 +98,8 @@ class ProcessUnqualified
         /** @var \Praxigento\PensionFund\Repo\Data\Registry $item */
         foreach ($registry as $item) {
             $custId = $item->getCustomerRef();
-            if (!in_array($custId, $pensioners)) {
-                list($updated, $amountClean) = $this->processRegistryItem($item, $period, $balances);
+            if (!in_array($custId, $pensioners) && !(in_array($custId, $warCusts))) {
+                [$updated, $amountClean] = $this->processRegistryItem($item, $period, $balances);
                 $this->daoReg->updateById($custId, $updated);
                 if ($amountClean > Cfg::DEF_ZERO) {
                     $trans[] = $this->createTransaction(
@@ -127,7 +128,8 @@ class ProcessUnqualified
      * Get "customer ID to pension balance" map.
      * @return array [$custId=>$balance]
      */
-    private function getBalancesPension() {
+    private function getBalancesPension()
+    {
         $result = [];
         $byAccId = $this->daoAcc->getAllByAssetTypeCode(Cfg::CODE_TYPE_ASSET_PENSION);
         foreach ($byAccId as $one) {
@@ -144,7 +146,8 @@ class ProcessUnqualified
      * @param array $balances "customer ID to pension balance" map ([$custId=>$balance]).
      * @return array [EPensReg, float]
      */
-    private function processRegistryItem($item, $period, $balances) {
+    private function processRegistryItem($item, $period, $balances)
+    {
         $custId = $item->getCustomerRef();
         $balance = $balances[$custId] ?? 0;
         $monthsInact = $item->getMonthsInact();
